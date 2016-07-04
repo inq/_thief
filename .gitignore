@@ -1,0 +1,17 @@
+logs
+dist
+cabal-dev
+*.o
+*.hi
+*.chi
+*.chs.h
+.virtualenv
+.hsenv
+.cabal-sandbox/
+.idea/
+cabal.sandbox.config
+cabal.config
+*.sock
+*.core
+*.pid
+.stack-work
