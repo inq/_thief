@@ -6,25 +6,41 @@ data Status = Idle
             | Escape
             | Empty
             | Num Int
+            | Chr Char
             | Pair Int Int
-            | Result ResData
             deriving Show
 data ResData = RPair Int Int
-             deriving Show
+             | RChar Char
+             | None
+             deriving (Eq, Show)
 
-char :: Status -> Char -> Maybe Status
-char Idle '\ESC' = Just Escape
-char Idle _ = Nothing
-char Escape '[' = Just Empty
+success :: ResData -> (Status, ResData)
+success = (,) Idle
+
+proceed :: Status -> (Status, ResData)
+proceed s = (,) s None
+
+char :: Status -> Char -> (Status, ResData)
+char Idle '\ESC' = proceed Escape
+char Idle c
+  | isLetter c = success $ RChar c
+  | otherwise = proceed $ Chr c 
+char Escape '[' = proceed Empty
 char Empty c
-  | isDigit c = Just $ Num $ digitToInt c
-  | otherwise = Nothing
+  | isDigit c = proceed $ Num $ digitToInt c
+  | c == 'A'  = success $ RChar '↑'
+  | c == 'B'  = success $ RChar '↓'
+  | c == 'C'  = success $ RChar '→'
+  | c == 'D'  = success $ RChar '←'
 char (Num n) c
-  | isDigit c = Just $ Num (n * 10 + digitToInt c)
-  | c == ';'  = Just $ Pair n 0
-  | otherwise = Nothing
+  | isDigit c = proceed $ Num (n * 10 + digitToInt c)
+  | c == ';'  = proceed $ Pair n 0
 char (Pair a b) c
-  | isDigit c = Just $ Pair a (b * 10 + digitToInt c)
-  | c == 'R'  = Just $ Result $ RPair a b
-  | otherwise = Nothing
-char _ _ = Nothing
+  | isDigit c = proceed $ Pair a (b * 10 + digitToInt c)
+  | c == 'R'  = success $ RPair a b
+char _ _ = (Idle, None)
+
+toStr :: ResData -> String
+toStr (RChar c)   = [c]
+toStr (RPair a b) = "(" ++ (show a) ++ "," ++ (show b) ++ ")"
+toStr None        = "None"

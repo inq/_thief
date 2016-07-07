@@ -1,8 +1,8 @@
 module Thief.Input where
 
-import qualified System.IO    as IO
-import qualified Thief.Status as Stat
-import Data.Char
+import qualified System.IO     as IO
+import qualified Control.Monad as M
+import qualified Thief.Status  as Stat
 
 initialize :: IO ()
 initialize = do
@@ -13,9 +13,6 @@ initialize = do
 
 inputLoop :: Stat.Status -> IO ()
 inputLoop stat = do
-    res <- Stat.char stat <$> getChar
-    let next = case res of
-          Just x -> x
-          _      -> Stat.Idle
-    putStrLn $ show next
+    (next, res) <- Stat.char stat <$> getChar
+    M.when (res /= Stat.None) $ putStrLn $ Stat.toStr res
     inputLoop next
