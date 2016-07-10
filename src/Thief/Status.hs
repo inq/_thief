@@ -48,6 +48,6 @@ char _ _ = (Idle, None)
 
 toStr :: ResData -> String
 toStr (RChar c)     = [c]
-toStr (RPair a b)   = "(" ++ (show a) ++ "," ++ (show b) ++ ")"
-toStr (RTrio a b c) = "(" ++ (show a) ++ "," ++ (show b) ++ "," ++ (show c) ++ ")"
+toStr (RPair a b)   = "(" ++ show a ++ "," ++ show b ++ ")"
+toStr (RTrio a b c) = "(" ++ show a ++ "," ++ show b ++ "," ++ show c ++ ")"
 toStr None          = "None"
