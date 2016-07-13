@@ -22,4 +22,6 @@ inputLoop :: Stat.Status -> IO ()
 inputLoop stat = do
     (next, res) <- Stat.char stat <$> getChar
     M.when (res /= Stat.None) $ putStrLn $ Stat.toStr res
-    inputLoop next
+    if res == Stat.RChar 'q'
+      then return ()
+      else inputLoop next

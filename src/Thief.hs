@@ -9,3 +9,4 @@ mainLoop = do
     Ipt.initialize
     Opt.initialize
     Ipt.inputLoop Stat.Idle
+    Opt.finalize
