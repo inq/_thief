@@ -2,7 +2,20 @@ module Thief.Status where
 
 import Data.Char
 
-data Status = Idle
+data Status = Status
+  { input :: InputStatus
+  , cursorPos :: CursorPos
+  }
+
+data CursorPos = CursorPos
+  { x :: Int
+  , y :: Int
+  , width :: Int
+  , height :: Int
+  }
+  deriving Show
+
+data InputStatus = Idle
             | Escape
             | Empty
             | Num Int
@@ -16,13 +29,28 @@ data ResData = RPair Int Int
              | None
              deriving (Eq, Show)
 
-success :: ResData -> (Status, ResData)
+moveUp :: CursorPos -> CursorPos
+moveUp (CursorPos x' y' w h) = CursorPos x' (y' - 1) w h
+
+moveDown :: CursorPos -> CursorPos
+moveDown (CursorPos x' y' w h) = CursorPos x' (y' + 1) w h
+
+moveLeft :: CursorPos -> CursorPos
+moveLeft (CursorPos x' y' w h) = CursorPos (x' - 1) y' w h
+
+moveRight :: CursorPos -> CursorPos
+moveRight (CursorPos x' y' w h) = CursorPos (x' + 1) y' w h
+
+defaultStatus :: Int -> Int -> Status
+defaultStatus w h = Status Idle $ CursorPos 0 0 w h
+
+success :: ResData -> (InputStatus, ResData)
 success = (,) Idle
 
-proceed :: Status -> (Status, ResData)
+proceed :: InputStatus -> (InputStatus, ResData)
 proceed s = (,) s None
 
-char :: Status -> Char -> (Status, ResData)
+char :: InputStatus -> Char -> (InputStatus, ResData)
 char Idle '\ESC' = proceed Escape
 char Idle c
   | isLetter c = success $ RChar c
