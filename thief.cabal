@@ -17,6 +17,7 @@ library
                      , Thief.Status
   other-modules:       Thief.Internal.FFI
                      , Thief.Ansi
+                     , Thief.Color
   build-depends:       base >= 4.7 && < 5
   default-language:    Haskell2010
 

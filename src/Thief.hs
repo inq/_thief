@@ -6,7 +6,7 @@ import qualified Thief.Status  as Stat
 
 mainLoop :: IO ()
 mainLoop = do
-    Ipt.initialize
     Opt.initialize
+    Ipt.initialize
     Ipt.inputLoop Stat.Idle
     Opt.finalize
