@@ -7,6 +7,8 @@ import qualified System.IO          as IO
 import qualified Control.Monad      as M
 import qualified Thief.Status       as Stat
 import qualified Thief.Ansi         as Ansi
+import qualified Thief.Color        as Color
+import qualified Thief.Box          as Box
 
 initialize :: IO ()
 initialize = do
@@ -27,6 +29,12 @@ inputLoop (Stat.Status stat pos) = do
                 Stat.RChar '→' -> Stat.moveRight pos
                 Stat.RChar '←' -> Stat.moveLeft pos
                 _ -> pos
+          M.when (res == Stat.RChar 'b') $ do
+              putStr $ show theBox
           putStr $ Ansi.moveCursor pos'
           M.when (res /= Stat.None) $ putStr $ Stat.toStr res
           inputLoop (Stat.Status next pos')
+  where
+    borderColor = Color.lightGray
+    fillColor = Color.darkBlue
+    theBox = Box.Box 30 30 80 30 borderColor fillColor
