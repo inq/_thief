@@ -2,7 +2,6 @@ module Thief.Box where
 
 import qualified Thief.Color  as Color
 import qualified Thief.Ansi   as Ansi
-import qualified Thief.Status as Stat
 
 data Box = Box
   { posX :: Int
@@ -16,15 +15,13 @@ data Box = Box
 instance Show Box where
   show (Box x y w h b f) = topLine ++ content ++ bottomLine
     where
-      topLine = Ansi.moveCursor topleft ++
-          Ansi.setBackground b ++ take w (repeat ' ')
+      topLine = Ansi.move x y ++ Ansi.spaces b w
       content = concat $ map content' [y + 1..y + h - 2]
-      content' y' = (Ansi.moveCursor $ left y') ++
-          Ansi.setBackground b ++ " " ++
-          Ansi.setBackground f ++ take (w - 2) (repeat ' ') ++
-          Ansi.setBackground b ++ " "
-      bottomLine = Ansi.moveCursor bottomleft ++
-          Ansi.setBackground b ++ take w (repeat ' ')
-      topleft = Stat.CursorPos x y 0 0
-      bottomleft = Stat.CursorPos x (y + h - 1) 0 0
-      left y' = Stat.CursorPos x y' 0 0
+        where
+          content' y' = concat
+            [ Ansi.move x y'
+            , Ansi.spaces b 1
+            , Ansi.spaces f (w - 2)
+            , Ansi.spaces b 1
+            ]
+      bottomLine = Ansi.move x (y + h - 1) ++ Ansi.spaces b w
