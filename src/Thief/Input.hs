@@ -18,7 +18,6 @@ initialize = do
 inputLoop :: Stat.Status -> IO ()
 inputLoop (Stat.Status stat pos) = do
     (next, res) <- Stat.char stat <$> getChar
-    M.when (res /= Stat.None) $ putStr $ Stat.toStr res
     if res == Stat.RChar 'q'
       then return ()
       else do
@@ -29,4 +28,5 @@ inputLoop (Stat.Status stat pos) = do
                 Stat.RChar '←' -> Stat.moveLeft pos
                 _ -> pos
           putStr $ Ansi.moveCursor pos'
+          M.when (res /= Stat.None) $ putStr $ Stat.toStr res
           inputLoop (Stat.Status next pos')
