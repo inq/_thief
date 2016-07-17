@@ -6,6 +6,7 @@ module Thief.IO.Input (
 import qualified System.IO          as IO
 import qualified Control.Monad      as M
 import qualified Thief.IO.Ansi      as Ansi
+import qualified Thief.IO.Result    as Res
 import qualified Thief.Status       as Stat
 import qualified Thief.Color        as Color
 import qualified Thief.Box          as Box
@@ -20,19 +21,19 @@ initialize = do
 inputLoop :: Stat.Status -> IO ()
 inputLoop (Stat.Status stat pos) = do
     (next, res) <- Stat.char stat <$> getChar
-    if res == Stat.RChar 'q'
+    if res == Res.Char 'q'
       then return ()
       else do
           let pos' = case res of
-                Stat.RChar '↑' -> Stat.moveUp pos
-                Stat.RChar '↓' -> Stat.moveDown pos
-                Stat.RChar '→' -> Stat.moveRight pos
-                Stat.RChar '←' -> Stat.moveLeft pos
+                Res.Arrow Res.Up    -> Stat.moveUp pos
+                Res.Arrow Res.Down  -> Stat.moveDown pos
+                Res.Arrow Res.Right -> Stat.moveRight pos
+                Res.Arrow Res.Left  -> Stat.moveLeft pos
                 _ -> pos
-          M.when (res == Stat.RChar 'b') $ do
+          M.when (res == Res.Char 'b') $ do
               putStr $ show theBox
           putStr $ Ansi.moveCursor pos'
-          M.when (res /= Stat.None) $ putStr $ Stat.toStr res
+          M.when (res /= Res.None) $ putStr $ Stat.toStr res
           inputLoop (Stat.Status next pos')
   where
     borderColor = Color.lightGray
