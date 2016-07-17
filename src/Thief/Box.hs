@@ -3,7 +3,7 @@ module Thief.Box
   ) where
 
 import qualified Thief.Color   as Color
-import qualified Thief.IO.Ansi as Ansi
+import qualified Thief.Raw.Ansi as Ansi
 
 data Box = Box
   { posX :: Int

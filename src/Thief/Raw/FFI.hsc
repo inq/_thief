@@ -1,6 +1,6 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Thief.IO.FFI (
+module Thief.Raw.FFI (
   getTermSize
 ) where
 

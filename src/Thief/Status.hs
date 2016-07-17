@@ -1,22 +1,9 @@
 module Thief.Status where
 
-import qualified Thief.IO.Result as Res
+import qualified Thief.Raw.Result as Res
 import Data.Char
 
-data Status = Status
-  { input :: InputStatus
-  , cursorPos :: CursorPos
-  }
-
-data CursorPos = CursorPos
-  { x :: Int
-  , y :: Int
-  , width :: Int
-  , height :: Int
-  }
-  deriving Show
-
-data InputStatus = Idle
+data Status = Idle
   | Escape
   | Empty
   | Num Int
@@ -25,28 +12,16 @@ data InputStatus = Idle
   | Trio Int Int Int
   deriving Show
 
-moveUp :: CursorPos -> CursorPos
-moveUp (CursorPos x' y' w h) = CursorPos x' (y' - 1) w h
+defaultStatus :: Status
+defaultStatus = Idle
 
-moveDown :: CursorPos -> CursorPos
-moveDown (CursorPos x' y' w h) = CursorPos x' (y' + 1) w h
-
-moveLeft :: CursorPos -> CursorPos
-moveLeft (CursorPos x' y' w h) = CursorPos (x' - 1) y' w h
-
-moveRight :: CursorPos -> CursorPos
-moveRight (CursorPos x' y' w h) = CursorPos (x' + 1) y' w h
-
-defaultStatus :: Int -> Int -> Status
-defaultStatus w h = Status Idle $ CursorPos 0 0 w h
-
-success :: Res.Result -> (InputStatus, Res.Result)
+success :: Res.Result -> (Status, Res.Result)
 success = (,) Idle
 
-proceed :: InputStatus -> (InputStatus, Res.Result)
+proceed :: Status -> (Status, Res.Result)
 proceed s = (,) s Res.None
 
-char :: InputStatus -> Char -> (InputStatus, Res.Result)
+char :: Status -> Char -> (Status, Res.Result)
 char Idle '\ESC' = proceed Escape
 char Idle c
   | isLetter c = success $ Res.Char c
