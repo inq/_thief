@@ -5,7 +5,6 @@ module Thief.Raw.Input
 
 import qualified Control.Concurrent.Chan as C
 import qualified System.IO          as IO
-import qualified Thief.Raw.Ansi     as Ansi
 import qualified Thief.Raw.Result   as Res
 import qualified Thief.Status       as Stat
 
@@ -14,7 +13,6 @@ initialize = do
     IO.hSetBuffering IO.stdout IO.NoBuffering
     IO.hSetBuffering IO.stdin IO.NoBuffering
     IO.hSetEcho IO.stdin False
-    putStrLn Ansi.queryCursorPos
 
 inputLoop :: C.Chan Res.Result -> Stat.Status -> IO ()
 inputLoop c stat = do

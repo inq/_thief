@@ -5,7 +5,7 @@ module Thief.Handler
 import qualified Control.Concurrent.Chan as C
 import qualified Control.Monad        as M
 import qualified Thief.Handler.Cursor as Cur
-import qualified Thief.Raw.Ansi       as Ansi
+import qualified Thief.Handler.Ansi   as Ansi
 import qualified Thief.Status         as Stat
 import qualified Thief.Raw            as Raw
 import qualified Thief.Color          as Color
@@ -21,7 +21,8 @@ handlerLoop c = do
         Raw.Action (Raw.ResizeScreen (Just (w, h))) -> do
             putStr $ Ansi.smcup
             putStr $ Ansi.fillScreen w h Color.darkBlood
-            loop c $ nextCur cur ipt
+            putStrLn Ansi.queryCursorPos
+            loop c $ Cur.move cur ipt
         Raw.Action (Raw.ResizeScreen Nothing) ->
             putStrLn "== cannot inspect the terminal =="
         Raw.Char 'q' ->
@@ -29,14 +30,9 @@ handlerLoop c = do
         _ -> do
             M.when (ipt == Raw.Char 'b') $ do
                 putStr $ show theBox
-            putStr $ Ansi.moveCursor $ nextCur cur ipt
+            putStr $ Ansi.moveCursor $ Cur.move cur ipt
             M.when (ipt /= Raw.None) $ putStr $ Stat.toStr ipt
-            loop c $ nextCur cur ipt
+            loop c $ Cur.move cur ipt
     borderColor = Color.lightGray
     fillColor = Color.darkBlue
     theBox = Box.Box 30 30 80 30 borderColor fillColor
-    nextCur cur (Raw.Arrow Raw.Up)    = Cur.moveUp cur
-    nextCur cur (Raw.Arrow Raw.Down)  = Cur.moveDown cur
-    nextCur cur (Raw.Arrow Raw.Right) = Cur.moveRight cur
-    nextCur cur (Raw.Arrow Raw.Left)  = Cur.moveLeft cur
-    nextCur cur _ = cur

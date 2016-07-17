@@ -1,11 +1,10 @@
 module Thief.Handler.Cursor
   ( Cursor(..)
   , defaultCursor
-  , moveUp
-  , moveDown
-  , moveLeft
-  , moveRight
+  , move
   )  where
+
+import qualified Thief.Raw            as Raw
 
 data Cursor = Cursor
   { x :: Int
@@ -18,14 +17,11 @@ data Cursor = Cursor
 defaultCursor :: Cursor
 defaultCursor = Cursor 0 0 0 0
 
-moveUp :: Cursor -> Cursor
-moveUp (Cursor x' y' w h) = Cursor x' (y' - 1) w h
-
-moveDown :: Cursor -> Cursor
-moveDown (Cursor x' y' w h) = Cursor x' (y' + 1) w h
-
-moveLeft :: Cursor -> Cursor
-moveLeft (Cursor x' y' w h) = Cursor (x' - 1) y' w h
-
-moveRight :: Cursor -> Cursor
-moveRight (Cursor x' y' w h) = Cursor (x' + 1) y' w h
+move :: Cursor -> Raw.Result -> Cursor
+move c@(Cursor x' y' w h) = move'
+  where
+    move' (Raw.Arrow Raw.Up)    = Cursor x' (y' - 1) w h
+    move' (Raw.Arrow Raw.Down)  = Cursor x' (y' + 1) w h
+    move' (Raw.Arrow Raw.Left)  = Cursor (x' - 1) y' w h
+    move' (Raw.Arrow Raw.Right) = Cursor (x' + 1) y' w h
+    move' _ = c

@@ -10,7 +10,6 @@ import qualified Control.Concurrent.Chan as C
 import qualified Thief.Raw.Result as Res
 import qualified Thief.Raw.Input  as Ipt
 import qualified Thief.Raw.FFI    as FFI
-import qualified Thief.Raw.Ansi   as Ansi
 import qualified Thief.Status    as Stat
 import qualified Thief.Color     as Color
 

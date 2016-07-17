@@ -1,4 +1,4 @@
-module Thief.Raw.Ansi
+module Thief.Handler.Ansi
   ( smcup
   , rmcup
   , queryCursorPos
