@@ -1,4 +1,12 @@
-module Thief.Ansi where
+module Thief.IO.Ansi
+  ( queryCursorPos
+  , clearScreen
+  , setBackground
+  , fillScreen
+  , moveCursor
+  , move
+  , spaces
+  ) where
 
 import qualified Thief.Color  as Color
 import qualified Thief.Status as Stat

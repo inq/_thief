@@ -1,7 +1,9 @@
-module Thief.Box where
+module Thief.Box
+  ( Box (..)
+  ) where
 
-import qualified Thief.Color  as Color
-import qualified Thief.Ansi   as Ansi
+import qualified Thief.Color   as Color
+import qualified Thief.IO.Ansi as Ansi
 
 data Box = Box
   { posX :: Int

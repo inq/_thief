@@ -1,4 +1,7 @@
-module Thief.Output where
+module Thief.IO.Output
+  ( initialize
+  , finalize
+  ) where
 
 initialize :: IO ()
 initialize = do

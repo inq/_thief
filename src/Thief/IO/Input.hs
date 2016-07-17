@@ -1,12 +1,12 @@
-module Thief.Input (
+module Thief.IO.Input (
   initialize,
   inputLoop
 ) where
 
 import qualified System.IO          as IO
 import qualified Control.Monad      as M
+import qualified Thief.IO.Ansi      as Ansi
 import qualified Thief.Status       as Stat
-import qualified Thief.Ansi         as Ansi
 import qualified Thief.Color        as Color
 import qualified Thief.Box          as Box
 

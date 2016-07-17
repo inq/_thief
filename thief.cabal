@@ -12,11 +12,14 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Thief
-                     , Thief.Input
-                     , Thief.Output
+  other-modules:       Thief.IO.FFI
+                     , Thief.IO.Input
+                     , Thief.IO.Output
+                     , Thief.IO.Ansi
+                     , Thief.IO.Signal
+                     , Thief.IO.Result
+                     , Thief.IO
                      , Thief.Status
-  other-modules:       Thief.Internal.FFI
-                     , Thief.Ansi
                      , Thief.Color
                      , Thief.Box
   build-depends:       base >= 4.7 && < 5
