@@ -1,4 +1,9 @@
-module Thief.Color where
+module Thief.Color
+  ( Color
+  , darkBlood
+  , darkBlue
+  , lightGray
+  ) where
 
 data Color = RGB
   { red   :: Int

@@ -1,6 +1,6 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Thief.Internal.FFI (
+module Thief.Raw.FFI (
   getTermSize
 ) where
 
@@ -10,7 +10,7 @@ import Foreign.C.Types (CInt(..), CUShort(..))
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-data Winsize = Winsize 
+data Winsize = Winsize
   { wsRow :: CUShort
   , wsCol :: CUShort
   , wsXpixel :: CUShort
@@ -38,7 +38,7 @@ getTermSize :: IO (Maybe (Int, Int))
 getTermSize =
     with (Winsize 0 0 0 0) $ \ws -> do
         res <- ioctl (#const STDOUT_FILENO) (#const TIOCGWINSZ) ws
-        if res < 0 
+        if res < 0
             then return Nothing
             else do
               Winsize row col _ _ <- peek ws

@@ -1,22 +1,13 @@
 module Thief where
 
-import qualified Thief.Input        as Ipt
-import qualified Thief.Output       as Opt
-import qualified Thief.Status       as Stat
-import qualified Thief.Ansi         as Ansi
-import qualified Thief.Color        as Color
-import qualified Thief.Internal.FFI as FFI
+import qualified Control.Concurrent.Chan as C
+import qualified Control.Concurrent      as CC
+import qualified Thief.Raw               as Raw
+import qualified Thief.Handler           as Hdr
 
 mainLoop :: IO ()
 mainLoop = do
-    Opt.initialize
-    Ipt.initialize
-    res <- FFI.getTermSize
-    case res of
-      Just (w, h) -> do
-          putStr $ Ansi.fillScreen w h Color.darkBlood
-          Ipt.inputLoop $ Stat.defaultStatus w h
-          Opt.finalize
-      _ -> do
-          Opt.finalize
-          putStrLn "== cannot inspect the terminal =="
+    chan <- C.newChan
+    Raw.initialize
+    tid <- CC.forkIO $ Raw.runLoop chan
+    Hdr.handlerLoop chan

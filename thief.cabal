@@ -12,14 +12,19 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Thief
-                     , Thief.Input
-                     , Thief.Output
+  other-modules:       Thief.Raw.FFI
+                     , Thief.Raw.Input
+                     , Thief.Raw.Signal
+                     , Thief.Raw.Result
+                     , Thief.Raw
                      , Thief.Status
-  other-modules:       Thief.Internal.FFI
-                     , Thief.Ansi
                      , Thief.Color
                      , Thief.Box
-  build-depends:       base >= 4.7 && < 5
+                     , Thief.Handler
+                     , Thief.Handler.Ansi
+                     , Thief.Handler.Cursor
+  build-depends:       base
+                     , unix
   default-language:    Haskell2010
 
 executable e
