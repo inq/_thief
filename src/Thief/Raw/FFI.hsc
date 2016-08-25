@@ -1,8 +1,8 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Thief.Raw.FFI (
-  getTermSize
-) where
+module Thief.Raw.FFI
+  ( getTermSize
+  ) where
 
 import Foreign
 import Foreign.C.Types (CInt(..), CUShort(..))

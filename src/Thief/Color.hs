@@ -1,5 +1,5 @@
 module Thief.Color
-  ( Color
+  ( Color (..)
   , darkBlood
   , darkBlue
   , lightGray
