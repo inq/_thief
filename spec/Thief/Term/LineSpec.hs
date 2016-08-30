@@ -10,9 +10,9 @@ import Thief.Term.Line
 
 spec :: Spec
 spec = describe "Line" $
-  context "Printable" $ do
+  context "Printable" $
     it "calculates width & height" $ do
       let color = RGB 255 255 255
           sc = MkChar 'X' $ MkBrush color color
           wc = MkChar 'ㅡ' $ MkBrush color color
-      (width $ MkLine [sc, wc, sc, wc]) `shouldBe` 6
+      width (MkLine [sc, wc, sc, wc]) `shouldBe` 6

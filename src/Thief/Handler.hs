@@ -27,8 +27,7 @@ handlerLoop c = loop c Cur.defaultCursor
         Raw.Char 'q' ->
             putStr Ansi.rmcup
         _ -> do
-            M.when (ipt == Raw.Char 'b') $ do
-                putStr $ show theBox
+            M.when (ipt == Raw.Char 'b') $ putStr $ show theBox
             putStr $ Ansi.moveCursor $ Cur.move cur ipt
             M.when (ipt /= Raw.None) $ putStr $ Stat.toStr ipt
             loop c $ Cur.move cur ipt

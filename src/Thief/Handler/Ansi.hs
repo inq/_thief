@@ -29,7 +29,7 @@ setBackground :: Color.Color -> String
 setBackground c = "\ESC[48;2;" ++ show c ++ "m"
 
 fillScreen :: Int -> Int -> Color.Color -> String
-fillScreen w h c = clearScreen ++ setBackground c ++ take (w * h) (repeat ' ')
+fillScreen w h c = clearScreen ++ setBackground c ++ replicate (w * h) ' '
 
 moveCursor :: Cur.Cursor -> String
 moveCursor (Cur.Cursor x y _ _) = move x y
@@ -38,4 +38,4 @@ move :: Int -> Int -> String
 move x y = "\ESC[" ++ show y ++ ";" ++ show x ++ "f"
 
 spaces :: Color.Color -> Int -> String
-spaces c n = setBackground c ++ take n (repeat ' ')
+spaces c n = setBackground c ++ replicate n ' '

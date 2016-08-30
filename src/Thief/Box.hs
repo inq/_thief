@@ -18,7 +18,7 @@ instance Show Box where
   show (Box x y w h b f) = topLine ++ content ++ bottomLine
     where
       topLine = Ansi.move x y ++ Ansi.spaces b w
-      content = concat $ map content' [y + 1..y + h - 2]
+      content = concatMap content' [y + 1..y + h - 2]
         where
           content' y' = concat
             [ Ansi.move x y'

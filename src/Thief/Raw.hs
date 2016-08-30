@@ -13,8 +13,7 @@ import qualified Thief.Raw.Input  as Ipt
 import qualified Thief.Status    as Stat
 
 initialize :: IO ()
-initialize = do
-    Ipt.initialize
+initialize = Ipt.initialize
 
 runLoop :: C.Chan Res.Result -> IO ()
 runLoop c = do

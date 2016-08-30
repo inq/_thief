@@ -9,7 +9,7 @@ import Thief.Term.TChar
 
 spec :: Spec
 spec = describe "TChar" $
-  context "Printable" $ do
+  context "Printable" $
     it "calculates width & height" $ do
       let color = RGB 255 255 255
           sc = MkChar 'X' $ MkBrush color color
