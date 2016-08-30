@@ -12,8 +12,8 @@ spec = describe "TChar" $
   context "Printable" $
     it "calculates width & height" $ do
       let color = RGB 255 255 255
-          sc = MkChar 'X' $ MkBrush color color
-          wc = MkChar 'ㅡ' $ MkBrush color color
+          sc = MkChar (MkBrush color color) 'X'
+          wc = MkChar (MkBrush color color) 'ㅡ'
       width sc `shouldBe` 1
       width wc `shouldBe` 2
       height sc `shouldBe` 1
