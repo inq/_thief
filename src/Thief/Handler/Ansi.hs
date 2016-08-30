@@ -8,10 +8,12 @@ module Thief.Handler.Ansi
   , moveCursor
   , move
   , spaces
+  , changeBrush
   ) where
 
 import qualified Thief.Color          as Color
 import qualified Thief.Handler.Cursor as Cur
+import Thief.Color (Brush(..))
 
 smcup :: String
 smcup = "\ESC[?47h"
@@ -39,3 +41,13 @@ move x y = "\ESC[" ++ show y ++ ";" ++ show x ++ "f"
 
 spaces :: Color.Color -> Int -> String
 spaces c n = setBackground c ++ replicate n ' '
+
+changeBrush :: Brush -> Brush -> String
+changeBrush (MkBrush ef eb) (MkBrush nf nb) = chfg ++ chbg
+  where
+    chfg = if ef /= nf
+      then "\ESC[38;2;" ++ show nf ++ "m"
+      else ""
+    chbg = if eb /= nb
+      then "\ESC[48;2;" ++ show nb ++ "m"
+      else ""
