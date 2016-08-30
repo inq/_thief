@@ -2,6 +2,7 @@ module Thief.Term.BufferSpec where
 
 import SpecHelper
 
+import Misc.Default (def)
 import Thief.Term.Printable (width, height)
 import Thief.Term.Line (Line(..))
 import Thief.Term.TChar (TChar(..))
@@ -13,7 +14,6 @@ spec :: Spec
 spec = describe "Buffer" $
   context "Printable" $
     it "calculates width & height" $ do
-      let color = RGB 255 255 255
-          sc = MkChar (MkBrush color color) 'X'
-          wc = MkChar (MkBrush color color) 'ㅡ'
+      let sc = MkChar def 'X'
+          wc = MkChar def 'ㅡ'
       width (MkBuffer [MkLine [sc, wc, sc, wc]]) `shouldBe` 6

@@ -17,6 +17,7 @@ library
                      , Thief.Term.Buffer
                      , Thief.Term.Line
                      , Thief.Color
+                     , Misc.Default
   other-modules:       Thief.Raw.FFI
                      , Thief.Raw.Input
                      , Thief.Raw.Signal
