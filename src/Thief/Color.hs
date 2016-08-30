@@ -1,5 +1,6 @@
 module Thief.Color
   ( Color (..)
+  , Brush (..)
   , darkBlood
   , darkBlue
   , lightGray
@@ -10,6 +11,8 @@ data Color = RGB
   , green :: Int
   , blue  :: Int
   }
+
+data Brush = MkBrush { fg :: Color, bg :: Color }
 
 darkBlood :: Color
 darkBlood = RGB 80 0 0

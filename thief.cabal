@@ -12,8 +12,10 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Thief
-                     , Thief.Term.TermChar
+                     , Thief.Term.TChar
                      , Thief.Term.Printable
+                     , Thief.Term.Buffer
+                     , Thief.Term.Line
                      , Thief.Color
   other-modules:       Thief.Raw.FFI
                      , Thief.Raw.Input

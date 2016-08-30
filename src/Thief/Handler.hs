@@ -12,21 +12,20 @@ import qualified Thief.Color          as Color
 import qualified Thief.Box            as Box
 
 handlerLoop :: C.Chan Raw.Result -> IO ()
-handlerLoop c = do
-    loop c $ Cur.defaultCursor
+handlerLoop c = loop c Cur.defaultCursor
   where
     loop c cur = do
       ipt <- C.readChan c
       case ipt of
         Raw.Action (Raw.ResizeScreen (Just (w, h))) -> do
-            putStr $ Ansi.smcup
+            putStr Ansi.smcup
             putStr $ Ansi.fillScreen w h Color.darkBlood
             putStrLn Ansi.queryCursorPos
             loop c $ Cur.move cur ipt
         Raw.Action (Raw.ResizeScreen Nothing) ->
             putStrLn "== cannot inspect the terminal =="
         Raw.Char 'q' ->
-            putStr $ Ansi.rmcup
+            putStr Ansi.rmcup
         _ -> do
             M.when (ipt == Raw.Char 'b') $ do
                 putStr $ show theBox
