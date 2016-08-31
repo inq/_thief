@@ -28,6 +28,7 @@ library
                      , Thief.Raw
                      , Thief.Status
                      , Thief.Handler
+                     , Thief.Handler.Status
                      , Thief.Term.FFI
   build-depends:       base
                      , unix

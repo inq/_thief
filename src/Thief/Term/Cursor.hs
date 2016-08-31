@@ -8,21 +8,21 @@ import Thief.Raw (Arrow(..), Result(..))
 import Thief.Term.Brush (Brush)
 
 data Cursor = MkCursor
-  { getBrush :: Brush
-  , getX :: Int
-  , getY :: Int
-  , getWidth :: Int
-  , getHeight :: Int
+  { theBrush :: Brush
+  , theX :: Int
+  , theY :: Int
+  , theWidth :: Int
+  , theHeight :: Int
   } deriving Show
 
 instance Default Cursor where
   def = MkCursor def 0 0 0 0
 
 move :: Cursor -> Result -> Cursor
-move c@MkCursor { getX = x', getY = y' } = move'
+move c@MkCursor { theX = x', theY = y' } = move'
   where
-    move' (Arrow AUp)    = c { getY = y' - 1}
-    move' (Arrow ADown)  = c { getY = y' + 1}
-    move' (Arrow ALeft)  = c { getX = x' - 1}
-    move' (Arrow ARight) = c { getX = x' + 1}
+    move' (Arrow AUp)    = c { theY = y' - 1}
+    move' (Arrow ADown)  = c { theY = y' + 1}
+    move' (Arrow ALeft)  = c { theX = x' - 1}
+    move' (Arrow ARight) = c { theX = x' + 1}
     move' _ = c
