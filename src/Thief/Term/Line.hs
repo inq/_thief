@@ -16,7 +16,11 @@ data Line = MkLine
 instance Printable Line where
   width = sum . map width . chars
   height _ = 1
-
+  toAnsi br (MkLine chars) = foldl convChar (br, "") chars
+    where
+      convChar (b, s) c = (nb, s ++ nc)
+        where
+          (nb, nc) = toAnsi b c
 
 fromString :: Brush -> String -> Line
 fromString br str = MkLine $ map (MkChar br) str

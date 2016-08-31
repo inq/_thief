@@ -16,7 +16,7 @@ data TChar = MkChar
 instance Printable TChar where
   width MkChar { ch = ch } = wcWidth ch
   height MkChar {} = 1
-  toAnsi b' (MkChar b c) = (changeBrush b' b ++ [c], b)
+  toAnsi b' (MkChar b c) = (b, changeBrush b' b ++ [c])
 
 space :: Brush -> TChar
 space br = MkChar br ' '

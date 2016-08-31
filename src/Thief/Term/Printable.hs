@@ -7,4 +7,4 @@ import Thief.Color (Brush)
 class Printable p where
   width :: p -> Int
   height :: p -> Int
-  toAnsi :: Brush -> p -> (String, Brush)
+  toAnsi :: Brush -> p -> (Brush, String)

@@ -21,6 +21,6 @@ spec = describe "TChar" $
     it "generate ansi string" $ do
       let sc = MkChar def '-'
       toAnsi (invert def) sc
-          `shouldBe` ("\ESC[38;2;200;200;200m\ESC[48;2;50;50;50m-", def)
+          `shouldBe` (def, "\ESC[38;2;200;200;200m\ESC[48;2;50;50;50m-")
       toAnsi def sc
-          `shouldBe` ("-", def)
+          `shouldBe` (def, "-")
