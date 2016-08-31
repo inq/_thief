@@ -41,5 +41,5 @@ getTermSize =
         if res < 0
             then return Nothing
             else do
-              Winsize row col _ _ <- peek ws
+              Winsize col row _ _ <- peek ws
               return $ Just (fromIntegral row, fromIntegral col)

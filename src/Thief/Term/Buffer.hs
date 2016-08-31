@@ -1,6 +1,7 @@
 module Thief.Term.Buffer
   ( Buffer(..)
   , blankBuffer
+  , borderedBuffer
   ) where
 
 import Prelude hiding (lines)
