@@ -13,7 +13,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Thief
                      , Thief.Term.TChar
-                     , Thief.Term.Printable
+                     , Thief.Term.Classes
                      , Thief.Term.Buffer
                      , Thief.Term.Line
                      , Thief.Term.Cursor

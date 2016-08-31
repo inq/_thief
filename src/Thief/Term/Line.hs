@@ -1,14 +1,15 @@
 module Thief.Term.Line
   ( Line(..)
   , blankLine
+  , borderedLine
   , fromString
   , leftAligned
   ) where
 
 import Prelude hiding (lines)
 import Thief.Term.Brush (Brush(..))
+import Thief.Term.Classes (Printable(..))
 import Thief.Term.TChar (TChar(MkChar), space)
-import Thief.Term.Printable (Printable(..))
 
 data Line = MkLine
   { chars :: [TChar]
@@ -30,6 +31,15 @@ instance Monoid Line where
 
 blankLine :: Brush -> Int -> Line
 blankLine br n = MkLine $ replicate n $ MkChar br ' '
+
+borderedLine :: Brush -> Brush -> Int -> Line
+borderedLine ebr ibr w
+  | w >= 2 = MkLine $ [edge] ++ replicate (w - 2) inside ++ [edge]
+  | w == 1 = MkLine [edge]
+  | otherwise = MkLine []
+  where
+    edge = MkChar ebr ' '
+    inside = MkChar ibr ' '
 
 fromString :: Brush -> String -> Line
 fromString br str = MkLine (MkChar br <$> str)

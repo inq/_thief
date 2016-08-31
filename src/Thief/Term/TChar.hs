@@ -4,8 +4,8 @@ module Thief.Term.TChar
   ) where
 
 import Thief.Term.Brush (Brush(..))
+import Thief.Term.Classes (Printable(..))
 import Thief.Term.FFI (wcWidth)
-import Thief.Term.Printable (Printable(..))
 import Thief.Term.Ansi (changeBrush)
 
 data TChar = MkChar

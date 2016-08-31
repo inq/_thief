@@ -4,7 +4,7 @@ import SpecHelper
 
 import Misc.Default (def)
 import Thief.Term.Brush (Brush(..))
-import Thief.Term.Printable (width, height)
+import Thief.Term.Classes (Printable(..))
 import Thief.Term.Line (Line(..))
 import Thief.Term.TChar (TChar(..))
 import Thief.Term.Buffer

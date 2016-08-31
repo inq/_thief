@@ -1,4 +1,4 @@
-module Thief.Term.Printable
+module Thief.Term.Classes
   ( Printable (..)
   ) where
 

@@ -4,7 +4,7 @@ import SpecHelper
 
 import Misc.Default (def)
 import Thief.Term.Brush (invert)
-import Thief.Term.Printable (width, height, toAnsi)
+import Thief.Term.Classes (Printable(..))
 import Thief.Term.TChar
 
 
