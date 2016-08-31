@@ -13,6 +13,7 @@ data Status
     { initialCursor :: (Int, Int)
     , getCursor :: Cursor
     }
+  | Terminated
 
 instance Default Status where
   def = Bare Nothing
