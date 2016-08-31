@@ -3,19 +3,22 @@ module Thief.Raw.Input
   , inputLoop
   ) where
 
-import qualified Control.Concurrent.Chan as C
-import qualified System.IO          as IO
-import qualified Thief.Raw.Result   as Res
-import qualified Thief.Status       as Stat
+import Control.Concurrent.Chan (Chan, writeChan)
+import System.IO
+  ( hSetBuffering, hSetEcho
+  , stdin, stdout
+  , BufferMode(NoBuffering))
+import Thief.Raw.Result (Result)
+import Thief.Status (Status, char)
 
 initialize :: IO ()
 initialize = do
-    IO.hSetBuffering IO.stdout IO.NoBuffering
-    IO.hSetBuffering IO.stdin IO.NoBuffering
-    IO.hSetEcho IO.stdin False
+    hSetBuffering stdout NoBuffering
+    hSetBuffering stdin NoBuffering
+    hSetEcho stdin False
 
-inputLoop :: C.Chan Res.Result -> Stat.Status -> IO ()
+inputLoop :: Chan Result -> Status -> IO ()
 inputLoop c stat = do
-    (next, res) <- Stat.char stat <$> getChar
-    C.writeChan c res
+    (next, res) <- char stat <$> getChar
+    writeChan c res
     inputLoop c next
