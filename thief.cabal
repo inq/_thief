@@ -31,6 +31,7 @@ library
                      , Thief.Term.FFI
   build-depends:       base
                      , unix
+                     , mtl
   default-language:    Haskell2010
 
 executable e
