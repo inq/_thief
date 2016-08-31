@@ -3,10 +3,10 @@ module Thief.Term.TChar
   , space
   ) where
 
-import Thief.Color (Brush(..))
+import Thief.Term.Brush (Brush(..))
 import Thief.Term.FFI (wcWidth)
 import Thief.Term.Printable (Printable(..))
-import Thief.Handler.Ansi (changeBrush)
+import Thief.Term.Ansi (changeBrush)
 
 data TChar = MkChar
   { brush :: Brush

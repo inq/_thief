@@ -2,7 +2,7 @@ module Thief.Term.Printable
   ( Printable (..)
   ) where
 
-import Thief.Color (Brush)
+import Thief.Term.Brush (Brush)
 
 class Printable p where
   width :: p -> Int

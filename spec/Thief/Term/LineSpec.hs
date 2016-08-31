@@ -3,8 +3,8 @@ module Thief.Term.LineSpec where
 import SpecHelper
 
 import Misc.Default (def)
+import Thief.Term.Brush (invert)
 import Thief.Term.Printable (width, toAnsi)
-import Thief.Color (invert)
 import Thief.Term.Line
 
 

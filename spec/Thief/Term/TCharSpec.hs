@@ -3,9 +3,9 @@ module Thief.Term.TCharSpec where
 import SpecHelper
 
 import Misc.Default (def)
+import Thief.Term.Brush (invert)
 import Thief.Term.Printable (width, height, toAnsi)
 import Thief.Term.TChar
-import Thief.Color (invert)
 
 
 spec :: Spec

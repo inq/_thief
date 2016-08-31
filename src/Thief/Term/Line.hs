@@ -1,12 +1,13 @@
 module Thief.Term.Line
   ( Line(..)
+  , blankLine
   , fromString
   , leftAligned
   ) where
 
 import Prelude hiding (lines)
+import Thief.Term.Brush (Brush(..))
 import Thief.Term.TChar (TChar(MkChar), space)
-import Thief.Color (Brush(..))
 import Thief.Term.Printable (Printable(..))
 
 data Line = MkLine
@@ -24,11 +25,14 @@ instance Printable Line where
 instance Monoid Line where
   mempty = MkLine []
   mappend (MkLine a) (MkLine b) = MkLine $ mappend a b
-  mconcat (MkLine a) = MkLine $ mconcat a
+  mconcat ls = MkLine $ mconcat (chars <$> ls)
 
+
+blankLine :: Brush -> Int -> Line
+blankLine br n = MkLine $ replicate n $ MkChar br ' '
 
 fromString :: Brush -> String -> Line
-fromString br str = MkLine $ map (MkChar br) str
+fromString br str = MkLine (MkChar br <$> str)
 
 leftAligned :: Brush -> Int -> String -> Line
 leftAligned br w str = MkLine (leftAligned' br w str)

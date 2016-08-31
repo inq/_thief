@@ -1,4 +1,4 @@
-module Thief.Handler.Ansi
+module Thief.Term.Ansi
   ( smcup
   , rmcup
   , queryCursorPos
@@ -11,9 +11,9 @@ module Thief.Handler.Ansi
   , changeBrush
   ) where
 
-import qualified Thief.Color          as Color
-import qualified Thief.Handler.Cursor as Cur
-import Thief.Color (Brush(..))
+import Thief.Term.Brush (Brush(..))
+import Thief.Term.Cursor (Cursor(..))
+import Misc.Color (Color)
 
 smcup :: String
 smcup = "\ESC[?47h"
@@ -27,19 +27,19 @@ queryCursorPos = "\ESC[6n"
 clearScreen :: String
 clearScreen = "\ESC[2J"
 
-setBackground :: Color.Color -> String
+setBackground :: Color -> String
 setBackground c = "\ESC[48;2;" ++ show c ++ "m"
 
-fillScreen :: Int -> Int -> Color.Color -> String
+fillScreen :: Int -> Int -> Color -> String
 fillScreen w h c = clearScreen ++ setBackground c ++ replicate (w * h) ' '
 
-moveCursor :: Cur.Cursor -> String
-moveCursor (Cur.Cursor x y _ _) = move x y
+moveCursor :: Cursor -> String
+moveCursor MkCursor { getX = x, getY = y } = move x y
 
 move :: Int -> Int -> String
 move x y = "\ESC[" ++ show y ++ ";" ++ show x ++ "f"
 
-spaces :: Color.Color -> Int -> String
+spaces :: Color -> Int -> String
 spaces c n = setBackground c ++ replicate n ' '
 
 changeBrush :: Brush -> Brush -> String
