@@ -19,8 +19,13 @@ instance Printable Line where
   toAnsi br (MkLine chars) = foldl convChar (br, "") chars
     where
       convChar (b, s) c = (nb, s ++ nc)
-        where
-          (nb, nc) = toAnsi b c
+        where (nb, nc) = toAnsi b c
+
+instance Monoid Line where
+  mempty = MkLine []
+  mappend (MkLine a) (MkLine b) = MkLine $ mappend a b
+  mconcat (MkLine a) = MkLine $ mconcat a
+
 
 fromString :: Brush -> String -> Line
 fromString br str = MkLine $ map (MkChar br) str
