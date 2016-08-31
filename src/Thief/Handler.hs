@@ -14,27 +14,28 @@ import Thief.Term.Brush (invert)
 import Thief.Term.Buffer (borderedBuffer)
 import Thief.Handler.Status (Status(..))
 import Control.Concurrent.Chan (Chan, readChan)
+import Control.Monad.Writer (Writer, runWriter, tell)
 import qualified Misc.Color as Color
 import qualified Thief.Status as Stat
 import qualified Thief.Raw as Raw
 
-exit :: (Int, Int) -> String -> IO Status
+exit :: (Int, Int) -> String -> Writer String Status
 exit orig msg = do
-    putStr rmcup
-    putStr $ uncurry movexy orig
+    tell rmcup
+    tell $ uncurry movexy orig
     return Terminated
 
-handler :: Status -> Raw.Result -> IO Status
+handler :: Status -> Raw.Result -> Writer String Status
 handler status@(Bare scr) = handle
   where
     handle (Raw.Action (Raw.ResizeScreen s)) = do
-        putStr queryCursorPos
+        tell queryCursorPos
         return $ Bare s
     handle (Raw.Pair y x) = do
-        putStr smcup
+        tell smcup
         case scr of
             Just (w, h) -> do
-                putStr $ snd $ toAnsi def $
+                tell $ snd $ toAnsi def $
                     borderedBuffer (invert def) def w h
                 return $ Ready (x, y) def
                     { theX = x, theY = y
@@ -45,7 +46,7 @@ handler status@(Bare scr) = handle
 handler status@(Ready orig cur) = handle
   where
     handle ipt@(Raw.Action (Raw.ResizeScreen (Just (w, h)))) = do
-        putStr $ snd $ toAnsi def $
+        tell $ snd $ toAnsi def $
             borderedBuffer (invert def) def w h
         return status { getCursor = move cur ipt }
     handle (Raw.Action (Raw.ResizeScreen Nothing)) =
@@ -53,9 +54,9 @@ handler status@(Ready orig cur) = handle
     handle (Raw.Char 'q') =
         exit orig "Have a nice day!"
     handle ipt = do
-        when (ipt == Raw.Char 'b') $ putStr "BOX"
-        putStr $ moveCursor $ move cur ipt
-        when (ipt /= Raw.None) $ putStr $ Stat.toStr ipt
+        when (ipt == Raw.Char 'b') $ tell "BOX"
+        tell $ moveCursor $ move cur ipt
+        when (ipt /= Raw.None) $ tell $ Stat.toStr ipt
         return status { getCursor = move cur ipt }
 
 handlerLoop :: Chan Raw.Result -> IO ()
@@ -63,7 +64,8 @@ handlerLoop c = loop c def
   where
     loop c status = do
       ipt <- readChan c
-      res <- handler status ipt
+      let (res, str) = runWriter $ handler status ipt
+      putStr str
       case res of
           Terminated -> return ()
           _ -> loop c res
