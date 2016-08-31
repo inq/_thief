@@ -16,5 +16,5 @@ data Action = Exit
   | ResizeScreen (Maybe (Int, Int))
   deriving (Eq, Show)
 
-data Arrow = Up | Down | Left | Right
+data Arrow = AUp | ADown | ALeft | ARight
   deriving (Eq, Show)

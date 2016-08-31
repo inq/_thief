@@ -29,10 +29,10 @@ char Idle c
 char Escape '[' = proceed Empty
 char Empty c
   | isDigit c = proceed $ Num $ digitToInt c
-  | c == 'A'  = success $ Res.Arrow Res.Up
-  | c == 'B'  = success $ Res.Arrow Res.Down
-  | c == 'C'  = success $ Res.Arrow Res.Right
-  | c == 'D'  = success $ Res.Arrow Res.Left
+  | c == 'A'  = success $ Res.Arrow Res.AUp
+  | c == 'B'  = success $ Res.Arrow Res.ADown
+  | c == 'C'  = success $ Res.Arrow Res.ARight
+  | c == 'D'  = success $ Res.Arrow Res.ALeft
 char (Num n) c
   | isDigit c = proceed $ Num (n * 10 + digitToInt c)
   | c == ';'  = proceed $ Pair n 0

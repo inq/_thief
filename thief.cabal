@@ -12,17 +12,23 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Thief
+                     , Thief.Term.TChar
+                     , Thief.Term.Classes
+                     , Thief.Term.Buffer
+                     , Thief.Term.Line
+                     , Thief.Term.Cursor
+                     , Thief.Term.Ansi
+                     , Thief.Term.Brush
+                     , Misc.Default
+                     , Misc.Color
   other-modules:       Thief.Raw.FFI
                      , Thief.Raw.Input
                      , Thief.Raw.Signal
                      , Thief.Raw.Result
                      , Thief.Raw
                      , Thief.Status
-                     , Thief.Color
-                     , Thief.Box
                      , Thief.Handler
-                     , Thief.Handler.Ansi
-                     , Thief.Handler.Cursor
+                     , Thief.Term.FFI
   build-depends:       base
                      , unix
   default-language:    Haskell2010
@@ -41,6 +47,7 @@ test-suite thief-test
   main-is:             Spec.hs
   build-depends:       base
                      , thief
+                     , hspec
   ghc-options:         -fllvm -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 source-repository head
