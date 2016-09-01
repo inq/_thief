@@ -15,22 +15,22 @@ import Thief.Term.Buffer (borderedBuffer)
 import Thief.Handler.Status (Status(..))
 import Control.Concurrent.Chan (Chan, readChan)
 import Control.Monad.Writer (Writer, runWriter, tell)
+import Control.Monad.State (StateT, runStateT, get, put, modify)
 import qualified Misc.Color as Color
 import qualified Thief.Status as Stat
 import qualified Thief.Raw as Raw
 
-exit :: (Int, Int) -> String -> Writer String Status
-exit orig msg = do
-    tell rmcup
-    tell $ uncurry movexy orig
-    return Terminated
+type Handler = StateT Status (Writer String) ()
 
-handler :: Status -> Raw.Result -> Writer String Status
-handler status@(Bare scr) = handle
+exit :: String -> Handler
+exit msg = tell msg >> put Terminated
+
+handler :: Status -> Raw.Result -> Handler
+handler (Bare scr) = handle
   where
     handle (Raw.Action (Raw.ResizeScreen s)) = do
         tell queryCursorPos
-        return $ Bare s
+        put $ Bare s
     handle (Raw.Pair y x) = do
         tell smcup
         case scr of
@@ -38,36 +38,40 @@ handler status@(Bare scr) = handle
                 tell $ movexy 0 0
                 tell $ snd $ toAnsi def $
                     borderedBuffer (invert def) def w h
-                return $ Ready (x, y) def
+                put $ Ready (x, y) def
                     { theX = x, theY = y
                     , theWidth = w, theHeight = h
                     }
-            Nothing -> exit (x, y) "Internal Error"
-    handle _ = return status
-handler status@(Ready orig cur) = handle
+            Nothing -> exit "Internal Error"
+    handle _ = return ()
+handler (Ready orig cur) = handle
   where
     handle ipt@(Raw.Action (Raw.ResizeScreen (Just (w, h)))) = do
         tell $ movexy 0 0
         tell $ snd $ toAnsi def $
             borderedBuffer (invert def) def w h
-        return status { getCursor = cur { theWidth = w, theHeight = h } }
+        modify (\x -> x { getCursor = cur { theWidth = w, theHeight = h } })
     handle (Raw.Action (Raw.ResizeScreen Nothing)) =
-        exit orig "Cannot inpect the terminal"
+        exit "Cannot inpect the terminal"
     handle (Raw.Char 'q') =
-        exit orig "Have a nice day!"
+        exit "Have a nice day!"
     handle ipt = do
         when (ipt == Raw.Char 'b') $ tell "BOX"
         tell $ moveCursor $ move cur ipt
         when (ipt /= Raw.None) $ tell $ Stat.toStr ipt
-        return status { getCursor = move cur ipt }
+        modify (\x -> x { getCursor = move cur ipt })
 
 handlerLoop :: Chan Raw.Result -> IO ()
 handlerLoop c = loop c def
   where
     loop c status = do
       ipt <- readChan c
-      let (res, str) = runWriter $ handler status ipt
+      let ((_, res), str) = runWriter $ runStateT (handler status ipt) status
       putStr str
       case res of
-          Terminated -> return ()
+          Terminated -> case status of
+              Ready orig _ -> do
+                 putStr rmcup
+                 putStr $ uncurry movexy orig
+              _ -> return ()
           _ -> loop c res
