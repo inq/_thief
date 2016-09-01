@@ -1,17 +1,20 @@
 module Thief.Raw.Signal where
 
-import qualified Control.Concurrent.Chan as C
-import qualified System.Posix.Signals as S
-import qualified Thief.Raw.FFI    as FFI
-import qualified Thief.Raw.Result as Res
+import Control.Concurrent.Chan (Chan, writeChan)
 import System.Posix.Signals.Exts (sigWINCH)
+import System.Posix.Signals (Handler(Catch), installHandler)
+import Thief.Raw.FFI (getTermSize)
+import Thief.Raw.Result (Result(Action), Action(ResizeScreen))
 
-resizeScreen :: C.Chan Res.Result -> IO ()
+
+resizeScreen :: Chan Result -> IO ()
+-- ^ Send the resize signal to the handler
 resizeScreen c = do
-    termSize <- FFI.getTermSize
-    C.writeChan c $ Res.Action $ Res.ResizeScreen termSize
+    termSize <- getTermSize
+    writeChan c $ Action $ ResizeScreen termSize
 
-installHandlers :: C.Chan Res.Result -> IO ()
+installHandlers :: Chan Result -> IO ()
+-- ^ Install the signal handlers
 installHandlers c = do
-    S.installHandler sigWINCH (S.Catch $ resizeScreen c) Nothing
+    installHandler sigWINCH (Catch $ resizeScreen c) Nothing
     resizeScreen c

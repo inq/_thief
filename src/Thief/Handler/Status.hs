@@ -5,6 +5,8 @@ module Thief.Handler.Status
 import Misc.Default (Default(..))
 import Thief.Term.Cursor (Cursor(..))
 
+-- * Data Constructors
+
 data Status
   = Bare
     { getScreenSize :: Maybe (Int, Int)

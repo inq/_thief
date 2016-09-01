@@ -4,6 +4,8 @@ module Thief.Raw.Result
   , Action(..)
   ) where
 
+-- * Data Constructors
+
 data Result = Arrow Arrow
   | Pair Int Int
   | Trio Int Int Int

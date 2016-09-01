@@ -1,13 +1,16 @@
-module Thief where
+module Thief
+  ( mainLoop
+  ) where
 
-import qualified Control.Concurrent.Chan as C
-import qualified Control.Concurrent      as CC
-import qualified Thief.Raw               as Raw
-import qualified Thief.Handler           as Hdr
+import Control.Concurrent.Chan (Chan, newChan)
+import Control.Concurrent (forkIO)
+import Thief.Raw (initialize, runLoop)
+import Thief.Handler (handlerLoop)
 
 mainLoop :: IO ()
+-- ^ The main procedure
 mainLoop = do
-    chan <- C.newChan
-    Raw.initialize
-    tid <- CC.forkIO $ Raw.runLoop chan
-    Hdr.handlerLoop chan
+    initialize
+    chan <- newChan
+    _ <- forkIO $ runLoop chan
+    handlerLoop chan

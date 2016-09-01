@@ -8,6 +8,8 @@ import Thief.Term.Classes (Printable(..))
 import Thief.Term.FFI (wcWidth)
 import Thief.Term.Ansi (changeBrush)
 
+-- * Data Constructors
+
 data TChar = MkChar
   { brush :: Brush
   , ch :: Char
@@ -18,5 +20,8 @@ instance Printable TChar where
   height MkChar {} = 1
   toAnsi b' (MkChar b c) = (b, changeBrush b' b ++ [c])
 
+-- * TChar
+
 space :: Brush -> TChar
+-- ^ Make a TChar for empty space
 space br = MkChar br ' '

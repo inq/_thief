@@ -3,11 +3,8 @@ module Thief.Term.Ansi
   , rmcup
   , queryCursorPos
   , clearScreen
-  , setBackground
-  , fillScreen
-  , moveCursor
+  , moveCur
   , movexy
-  , spaces
   , changeBrush
   ) where
 
@@ -16,33 +13,31 @@ import Thief.Term.Cursor (Cursor(..))
 import Misc.Color (Color)
 
 smcup :: String
+-- ^ Clear the screen
 smcup = "\ESC[?47h"
 
 rmcup :: String
+-- ^ Restore the original screen
 rmcup = "\ESC[?47l"
 
 queryCursorPos :: String
+-- ^ Query the cursor position to the client
 queryCursorPos = "\ESC[6n"
 
 clearScreen :: String
+-- ^ Clean the screen
 clearScreen = "\ESC[2J"
 
-setBackground :: Color -> String
-setBackground c = "\ESC[48;2;" ++ show c ++ "m"
-
-fillScreen :: Int -> Int -> Color -> String
-fillScreen w h c = clearScreen ++ setBackground c ++ replicate (w * h) ' '
-
-moveCursor :: Cursor -> String
-moveCursor MkCursor { theX = x, theY = y } = movexy x y
+moveCur :: Cursor -> String
+-- ^ Move the cursor
+moveCur MkCursor { theX = x, theY = y } = movexy x y
 
 movexy :: Int -> Int -> String
+-- ^ Move the cursor (raw)
 movexy x y = "\ESC[" ++ show y ++ ";" ++ show x ++ "f"
 
-spaces :: Color -> Int -> String
-spaces c n = setBackground c ++ replicate n ' '
-
 changeBrush :: Brush -> Brush -> String
+-- ^ Change the brush
 changeBrush (MkBrush ef eb) (MkBrush nf nb) = chfg ++ chbg
   where
     chfg = if ef /= nf
