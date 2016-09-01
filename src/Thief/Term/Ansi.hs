@@ -6,7 +6,7 @@ module Thief.Term.Ansi
   , setBackground
   , fillScreen
   , moveCursor
-  , move
+  , movexy
   , spaces
   , changeBrush
   ) where
@@ -34,10 +34,10 @@ fillScreen :: Int -> Int -> Color -> String
 fillScreen w h c = clearScreen ++ setBackground c ++ replicate (w * h) ' '
 
 moveCursor :: Cursor -> String
-moveCursor MkCursor { getX = x, getY = y } = move x y
+moveCursor MkCursor { theX = x, theY = y } = movexy x y
 
-move :: Int -> Int -> String
-move x y = "\ESC[" ++ show y ++ ";" ++ show x ++ "f"
+movexy :: Int -> Int -> String
+movexy x y = "\ESC[" ++ show y ++ ";" ++ show x ++ "f"
 
 spaces :: Color -> Int -> String
 spaces c n = setBackground c ++ replicate n ' '
