@@ -35,6 +35,7 @@ handler status@(Bare scr) = handle
         tell smcup
         case scr of
             Just (w, h) -> do
+                tell $ movexy 0 0
                 tell $ snd $ toAnsi def $
                     borderedBuffer (invert def) def w h
                 return $ Ready (x, y) def
@@ -46,9 +47,10 @@ handler status@(Bare scr) = handle
 handler status@(Ready orig cur) = handle
   where
     handle ipt@(Raw.Action (Raw.ResizeScreen (Just (w, h)))) = do
+        tell $ movexy 0 0
         tell $ snd $ toAnsi def $
             borderedBuffer (invert def) def w h
-        return status { getCursor = move cur ipt }
+        return status { getCursor = cur { theWidth = w, theHeight = h } }
     handle (Raw.Action (Raw.ResizeScreen Nothing)) =
         exit orig "Cannot inpect the terminal"
     handle (Raw.Char 'q') =
