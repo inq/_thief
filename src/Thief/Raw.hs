@@ -5,7 +5,7 @@ module Thief.Raw
   , Action(..)
   ) where
 
-import Misc.Default (Default(def))
+import Misc (def)
 import Thief.Raw.Input (inputLoop, initialize)
 import Control.Concurrent.Chan (Chan)
 import Thief.Raw.Result (Result(..), Arrow(..), Action(..))

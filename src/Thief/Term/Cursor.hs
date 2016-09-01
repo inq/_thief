@@ -3,7 +3,7 @@ module Thief.Term.Cursor
   , moveCursor
   ) where
 
-import Misc.Default (Default(..))
+import Misc (Default(def))
 import Thief.Raw (Arrow(..), Result(..))
 import Thief.Term.Brush (Brush)
 

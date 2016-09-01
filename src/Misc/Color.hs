@@ -6,6 +6,7 @@ module Misc.Color
   , darkGray
   ) where
 
+-- * Data Constructors
 
 data Color = RGB
   { red   :: Int
@@ -15,6 +16,8 @@ data Color = RGB
 
 instance Show Color where
     show (RGB r g b) = show r ++ ";" ++ show g ++ ";" ++ show b
+
+-- * Color
 
 darkBlood :: Color
 darkBlood = RGB 80 0 0

@@ -2,8 +2,8 @@ module Thief.Term.TCharSpec where
 
 import SpecHelper
 
-import Misc.Default (def)
-import Thief.Term.Brush (invert)
+import Misc (def)
+import Thief.Term.Brush (invertBrush)
 import Thief.Term.Classes (Printable(..))
 import Thief.Term.TChar
 
@@ -20,7 +20,7 @@ spec = describe "TChar" $
       height wc `shouldBe` 1
     it "generate ansi string" $ do
       let sc = MkChar def '-'
-      toAnsi (invert def) sc
+      toAnsi (invertBrush def) sc
           `shouldBe` (def, "\ESC[38;2;200;200;200m\ESC[48;2;50;50;50m-")
       toAnsi def sc
           `shouldBe` (def, "-")

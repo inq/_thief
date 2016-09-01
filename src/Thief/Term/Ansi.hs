@@ -10,7 +10,7 @@ module Thief.Term.Ansi
 
 import Thief.Term.Brush (Brush(..))
 import Thief.Term.Cursor (Cursor(..))
-import Misc.Color (Color)
+import Misc (Color)
 
 smcup :: String
 -- ^ Clear the screen

@@ -2,7 +2,7 @@ module Thief.Term.BufferSpec where
 
 import SpecHelper
 
-import Misc.Default (def)
+import Misc (def)
 import Thief.Term.Brush (Brush(..))
 import Thief.Term.Classes (Printable(..))
 import Thief.Term.Line (Line(..))

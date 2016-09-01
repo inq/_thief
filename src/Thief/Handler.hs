@@ -3,7 +3,7 @@ module Thief.Handler
   ) where
 
 import Control.Monad (when)
-import Misc.Default (def)
+import Misc (def)
 import Thief.Term
   ( Printable(toAnsi)
   , Cursor(theX, theY, theWidth, theHeight), moveCursor
@@ -15,8 +15,6 @@ import Thief.Handler.Status (Status(..))
 import Control.Concurrent.Chan (Chan, readChan)
 import Control.Monad.Writer (Writer, runWriter, tell)
 import Control.Monad.State (StateT, runStateT, get, put, modify)
-import qualified Misc.Color as Color
-import qualified Thief.Status as Stat
 import qualified Thief.Raw as Raw
 
 -- * Type Alises

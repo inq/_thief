@@ -3,8 +3,7 @@ module Thief.Term.Brush
   , invertBrush
   ) where
 
-import Misc.Color (Color(..), lightGray, darkGray)
-import Misc.Default (Default(..))
+import Misc (Default(def), Color, lightGray, darkGray)
 
 -- * Data Constructors
 
