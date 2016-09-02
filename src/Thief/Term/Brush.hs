@@ -1,10 +1,11 @@
 module Thief.Term.Brush
   ( Brush (..)
-  , invert
+  , invertBrush
   ) where
 
-import Misc.Color (Color(..), lightGray, darkGray)
-import Misc.Default (Default(..))
+import Misc (Default(def), Color, lightGray, darkGray)
+
+-- * Data Constructors
 
 data Brush = MkBrush
   { fg :: Color
@@ -14,5 +15,8 @@ data Brush = MkBrush
 instance Default Brush where
     def = MkBrush lightGray darkGray
 
-invert :: Brush -> Brush
-invert (MkBrush f b) = MkBrush b f
+-- * Brush
+
+invertBrush :: Brush -> Brush
+-- ^ Swap fg with bg
+invertBrush (MkBrush f b) = MkBrush b f

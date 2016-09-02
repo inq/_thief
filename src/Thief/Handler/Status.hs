@@ -2,8 +2,10 @@ module Thief.Handler.Status
   ( Status(..)
   ) where
 
-import Misc.Default (Default(..))
-import Thief.Term.Cursor (Cursor(..))
+import Misc (Default(def))
+import Thief.Term.Cursor (Cursor)
+
+-- * Data Constructors
 
 data Status
   = Bare

@@ -4,6 +4,8 @@ module Thief.Term.Classes
 
 import Thief.Term.Brush (Brush)
 
+-- * Class Definitions
+
 class Printable p where
   width :: p -> Int
   height :: p -> Int

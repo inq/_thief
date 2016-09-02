@@ -1,11 +1,13 @@
 module Thief.Term.Cursor
   ( Cursor (..)
-  , move
+  , moveCursor
   ) where
 
-import Misc.Default (Default(..))
+import Misc (Default(def))
 import Thief.Raw (Arrow(..), Result(..))
 import Thief.Term.Brush (Brush)
+
+-- * Data Constructors
 
 data Cursor = MkCursor
   { theBrush :: Brush
@@ -18,8 +20,11 @@ data Cursor = MkCursor
 instance Default Cursor where
   def = MkCursor def 0 0 0 0
 
-move :: Cursor -> Result -> Cursor
-move c@MkCursor { theX = x', theY = y' } = move'
+-- * Cursor
+
+moveCursor :: Cursor -> Result -> Cursor
+-- ^ Modify the cursor by the action
+moveCursor c@MkCursor { theX = x', theY = y' } = move'
   where
     move' (Arrow AUp)    = c { theY = y' - 1}
     move' (Arrow ADown)  = c { theY = y' + 1}

@@ -4,11 +4,13 @@ module Thief.Raw.FFI
   ( getTermSize
   ) where
 
-import Foreign
 import Foreign.C.Types (CInt(..), CUShort(..))
+import Foreign
 
 #include <sys/ioctl.h>
 #include <unistd.h>
+
+-- * Data Constructors
 
 data Winsize = Winsize
   { wsRow :: CUShort
@@ -35,6 +37,7 @@ instance Storable Winsize where
         (#poke struct winsize, ws_ypixel) ptr y
 
 getTermSize :: IO (Maybe (Int, Int))
+-- ^ Get the terminal size
 getTermSize =
     with (Winsize 0 0 0 0) $ \ws -> do
         res <- ioctl (#const STDOUT_FILENO) (#const TIOCGWINSZ) ws

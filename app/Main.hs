@@ -1,6 +1,6 @@
 module Main where
 
-import Thief
+import Thief (mainLoop)
 
 main :: IO ()
 main = mainLoop

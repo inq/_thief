@@ -13,4 +13,5 @@ foreign import ccall "wchar.h wcwidth"
     wcwidth :: CWchar -> CInt
 
 wcWidth :: Char -> Int
+-- ^ Get the width of the charactor
 wcWidth = fromEnum . wcwidth . toEnum . fromEnum

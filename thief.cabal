@@ -19,8 +19,10 @@ library
                      , Thief.Term.Cursor
                      , Thief.Term.Ansi
                      , Thief.Term.Brush
+                     , Thief.Term
                      , Misc.Default
                      , Misc.Color
+                     , Misc
   other-modules:       Thief.Raw.FFI
                      , Thief.Raw.Input
                      , Thief.Raw.Signal

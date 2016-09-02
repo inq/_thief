@@ -9,6 +9,8 @@ import Thief.Term.Brush (Brush(..))
 import Thief.Term.Classes (Printable(..))
 import Thief.Term.Line (Line(..), blankLine, borderedLine)
 
+-- * Data Constructors
+
 data Buffer = MkBuffer
   { lines :: [Line]
   }
@@ -21,10 +23,14 @@ instance Printable Buffer where
       convLine (b, s) c = (nb, s ++ nc)
         where (nb, nc) = toAnsi b c
 
+-- * Buffer
+
 blankBuffer :: Brush -> Int -> Int -> Buffer
+-- ^ Make a rectangular buffer
 blankBuffer br w h = MkBuffer $ replicate h $ blankLine br w
 
 borderedBuffer :: Brush -> Brush -> Int -> Int -> Buffer
+-- ^ Make a bordered rectangular buffer
 borderedBuffer ebr ibr w h
   | h >= 2 = MkBuffer $ [edge] ++ replicate (h - 2) inside ++ [edge]
   | h == 1 = MkBuffer [edge]

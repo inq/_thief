@@ -1,7 +1,14 @@
-module Thief.Status where
+module Thief.Status
+  ( Status
+  , proceed
+  , char
+  ) where
 
+import Misc (Default(def))
 import qualified Thief.Raw.Result as Res
 import Data.Char
+
+-- * Data Constructors
 
 data Status = Idle
   | Escape
@@ -12,16 +19,21 @@ data Status = Idle
   | Trio Int Int Int
   deriving Show
 
-defaultStatus :: Status
-defaultStatus = Idle
+instance Default Status where
+  def = Idle
+
+-- * Status
 
 success :: Res.Result -> (Status, Res.Result)
+-- ^ Finish the automata
 success = (,) Idle
 
 proceed :: Status -> (Status, Res.Result)
+-- ^ Continue the automata
 proceed s = (,) s Res.None
 
 char :: Status -> Char -> (Status, Res.Result)
+-- ^ The raw input automata
 char Idle '\ESC' = proceed Escape
 char Idle c
   | isLetter c = success $ Res.Char c
@@ -44,10 +56,3 @@ char (Trio a b c) d
   | isDigit d = proceed $ Trio a b (c * 10 + digitToInt d)
   | d == 't'  = success $ Res.Trio a b c
 char _ _ = (Idle, Res.None)
-
-toStr :: Res.Result -> String
-toStr (Res.Char c)     = [c]
-toStr (Res.Pair a b)   = "(" ++ show a ++ "," ++ show b ++ ")"
-toStr (Res.Trio a b c) = "(" ++ show a ++ "," ++ show b ++ "," ++ show c ++ ")"
-toStr (Res.Arrow _)    = "*"
-toStr Res.None         = "None"

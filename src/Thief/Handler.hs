@@ -3,29 +3,30 @@ module Thief.Handler
   ) where
 
 import Control.Monad (when)
-import Misc.Default (def)
-import Thief.Term.Ansi
-  ( smcup, rmcup
-  , movexy, moveCursor
-  , queryCursorPos)
-import Thief.Term.Classes (Printable(..))
-import Thief.Term.Cursor (Cursor(..), move)
-import Thief.Term.Brush (invert)
-import Thief.Term.Buffer (borderedBuffer)
+import Misc (def)
+import Thief.Term
+  ( Printable(toAnsi)
+  , Cursor(theX, theY, theWidth, theHeight), moveCursor
+  , invertBrush
+  , borderedBuffer
+  , smcup, rmcup, movexy, moveCur, queryCursorPos
+  )
 import Thief.Handler.Status (Status(..))
 import Control.Concurrent.Chan (Chan, readChan)
 import Control.Monad.Writer (Writer, runWriter, tell)
 import Control.Monad.State (StateT, runStateT, get, put, modify)
-import qualified Misc.Color as Color
-import qualified Thief.Status as Stat
 import qualified Thief.Raw as Raw
+
+-- * Type Alises
 
 type Handler = StateT Status (Writer String) ()
 
 exit :: String -> Handler
+-- ^ Exit the handler
 exit msg = tell msg >> put Terminated
 
 handler :: Status -> Raw.Result -> Handler
+-- ^ The core handler
 handler (Bare scr) = handle
   where
     handle (Raw.Action (Raw.ResizeScreen s)) = do
@@ -37,7 +38,7 @@ handler (Bare scr) = handle
             Just (w, h) -> do
                 tell $ movexy 0 0
                 tell $ snd $ toAnsi def $
-                    borderedBuffer (invert def) def w h
+                    borderedBuffer (invertBrush def) def w h
                 put $ Ready (x, y) def
                     { theX = x, theY = y
                     , theWidth = w, theHeight = h
@@ -49,7 +50,7 @@ handler (Ready orig cur) = handle
     handle ipt@(Raw.Action (Raw.ResizeScreen (Just (w, h)))) = do
         tell $ movexy 0 0
         tell $ snd $ toAnsi def $
-            borderedBuffer (invert def) def w h
+            borderedBuffer (invertBrush def) def w h
         modify (\x -> x { getCursor = cur { theWidth = w, theHeight = h } })
     handle (Raw.Action (Raw.ResizeScreen Nothing)) =
         exit "Cannot inpect the terminal"
@@ -57,11 +58,12 @@ handler (Ready orig cur) = handle
         exit "Have a nice day!"
     handle ipt = do
         when (ipt == Raw.Char 'b') $ tell "BOX"
-        tell $ moveCursor $ move cur ipt
-        when (ipt /= Raw.None) $ tell $ Stat.toStr ipt
-        modify (\x -> x { getCursor = move cur ipt })
+        tell $ moveCur $ moveCursor cur ipt
+        when (ipt /= Raw.None) $ tell $ show ipt
+        modify (\x -> x { getCursor = moveCursor cur ipt })
 
 handlerLoop :: Chan Raw.Result -> IO ()
+-- ^ The main loop
 handlerLoop c = loop c def
   where
     loop c status = do
