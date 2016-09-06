@@ -2,6 +2,7 @@ module Misc.StateMachineSpec where
 
 import SpecHelper
 import Control.Applicative (Alternative(..))
+import Data.Char (toUpper)
 
 import Misc.StateMachine
 
@@ -47,5 +48,7 @@ spec = describe "StateMachine" $ do
     it "process a string" $ do
       let f = runString "hihiho" $ string "hellu" <|> string "hihihi"
           s = runString "hello" $ string "hello" <|> string "hihihi"
+          l = runString "c" $ (toUpper <$> char 'c') <|> anyChar
       f `shouldBe` Nothing
       s `shouldBe` Just "hello"
+      l `shouldBe` Just 'C'

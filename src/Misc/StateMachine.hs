@@ -1,12 +1,14 @@
 module Misc.StateMachine
   ( StateMachine(..)
   , char
+  , anyChar
   , string
   , integer
   ) where
 
 import Control.Applicative (Alternative(..))
 import Data.Char (isDigit, digitToInt)
+import Debug.Trace (trace)
 
 -- * Data Constructors
 
@@ -47,11 +49,11 @@ instance Applicative StateMachine where
     let (resultB, nextB) = actionB c'
     in case actionA c' of
       (Just x, Success) -> (Nothing, pure x <*> More actionB)
-      (Just x, Pass)         -> (Just x <*> resultB, pure x <*> nextB)
+      (Just x, Pass)    -> (Just x <*> resultB, pure x <*> nextB)
       (_, a)            -> (Nothing, a <*> More actionB)
   Failure <*> _ = Failure
   _ <*> Failure = Failure
-  _ <*> _ = Success
+  a <*> b = Success
 
 instance Alternative StateMachine where
   empty = Failure
@@ -59,9 +61,10 @@ instance Alternative StateMachine where
     let (resultA, nextA) = actionA c'
         (resultB, nextB) = actionB c'
     in  (resultA <|> resultB, nextA <|> nextB)
+  More actionA <|> Success = More actionA -- TODO: Consider this
   Failure <|> a = a
   a <|> Failure = a
-  _ <|> _ = Failure
+  a <|> b = trace (show a ++  "|" ++  show b) Failure
 
 -- * StateMachine
 
@@ -70,6 +73,10 @@ char :: Char -> StateMachine Char
 char c = More $ \c' -> if c == c'
   then (Just c, Success)
   else (Nothing, Failure)
+
+anyChar :: StateMachine Char
+-- ^ Accept any character
+anyChar = More $ \c' -> (Just c', Success)
 
 string :: String -> StateMachine String
 -- ^ Accept a sequential string

@@ -16,4 +16,4 @@ runLoop :: Chan Result -> IO ()
 -- ^ Install the signal handlers and run the input loop
 runLoop c = do
     installHandlers c
-    inputLoop c def
+    inputLoop c
