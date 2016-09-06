@@ -1,8 +1,19 @@
 module Misc.StateMachineSpec where
 
 import SpecHelper
+import Control.Applicative (Alternative(..))
 
 import Misc.StateMachine
+
+runString :: String -> StateMachine String -> Maybe String
+runString (c:cs) cur = case next of
+    Failure -> res
+    More _ -> runString cs next
+    Success -> res
+    _ -> error "cannot be here"
+  where
+    (res, next) = runMore cur c
+runString [] _ = Nothing
 
 spec :: Spec
 spec = describe "StateMachine" $ do
@@ -22,12 +33,13 @@ spec = describe "StateMachine" $ do
       s `shouldBe` Just "x"
   context "Applicative" $ do
     it "process a string" $ do
-      let p0 = string "hello"
-          (_, p1) = runMore p0 'h'
-          (_, p2) = runMore p1 'e'
-          (_, p3) = runMore p2 'l'
-          (_, p4) = runMore p3 'l'
-          (r5, _) = runMore p4 'o'
-          (r6, _) = runMore p2 'h'
-      r5 `shouldBe` Just "hello"
-      r6 `shouldBe` Nothing
+      let f = runString "hello" $ string "hellu"
+          s = runString "hello" $ string "hello"
+      f `shouldBe` Nothing
+      s `shouldBe` Just "hello"
+  context "Alternative" $ do
+    it "process a string" $ do
+      let f = runString "hihiho" $ string "hellu" <|> string "hihihi"
+          s = runString "hello" $ string "hello" <|> string "hihihi"
+      f `shouldBe` Nothing
+      s `shouldBe` Just "hello"

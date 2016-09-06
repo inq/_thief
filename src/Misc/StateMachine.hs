@@ -4,6 +4,8 @@ module Misc.StateMachine
   , string
   ) where
 
+import Control.Applicative (Alternative(..))
+
 data StateMachine a
   -- * More (Char -> (Result, Next))
   = More { runMore :: Char -> (Maybe a, StateMachine a) }
@@ -34,7 +36,19 @@ instance Applicative StateMachine where
         a       ||| _      = a
         (resultA, nextA) = actionA c'
     in  (Nothing, (nextA ||| resultA) <*> More actionB)
-  _ <*> _ = Failure
+  Failure <*> _ = Failure
+  _ <*> Failure = Failure
+  _ <*> _ = Success
+
+instance Alternative StateMachine where
+  empty = Failure
+  More actionA <|> More actionB = More $ \c' ->
+    let (resultA, nextA) = actionA c'
+        (resultB, nextB) = actionB c'
+    in  (resultA <|> resultB, nextA <|> nextB)
+  Failure <|> a = a
+  a <|> Failure = a
+  _ <|> _ = Failure
 
 char :: Char -> StateMachine Char
 char c = More $ \c' -> if c == c'
