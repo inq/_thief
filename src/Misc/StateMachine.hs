@@ -2,9 +2,13 @@ module Misc.StateMachine
   ( StateMachine(..)
   , char
   , string
+  , integer
   ) where
 
 import Control.Applicative (Alternative(..))
+import Data.Char (isDigit, digitToInt)
+
+-- * Data Constructors
 
 data StateMachine a
   -- * More (Char -> (Result, Next))
@@ -12,7 +16,14 @@ data StateMachine a
   -- * Func
   | Func a
   -- * No more actions
-  | Success | Failure
+  | Success | Failure | Pass
+
+instance Show (StateMachine a) where
+  show (More _) = "More *"
+  show (Func _) = "Func *"
+  show (Success) = "Success"
+  show (Failure) = "Failure"
+  show (Pass) = "Pass"
 
 instance Functor StateMachine where
   fmap f (More action) = More $ \c' ->
@@ -21,6 +32,7 @@ instance Functor StateMachine where
   fmap f (Func a) = Func $ f a
   fmap _ Success = Success
   fmap _ Failure = Failure
+  fmap _ Pass = Pass
 
 instance Applicative StateMachine where
   pure f = Func f
@@ -32,10 +44,11 @@ instance Applicative StateMachine where
     let (resultA, nextA) = actionA c'
     in  (resultA <*> pure b, nextA <*> pure b)
   More actionA <*> More actionB = More $ \c' ->
-    let Success ||| Just x = pure x
-        a       ||| _      = a
-        (resultA, nextA) = actionA c'
-    in  (Nothing, (nextA ||| resultA) <*> More actionB)
+    let (resultB, nextB) = actionB c'
+    in case actionA c' of
+      (Just x, Success) -> (Nothing, pure x <*> More actionB)
+      (Just x, Pass)         -> (Just x <*> resultB, pure x <*> nextB)
+      (_, a)            -> (Nothing, a <*> More actionB)
   Failure <*> _ = Failure
   _ <*> Failure = Failure
   _ <*> _ = Success
@@ -50,11 +63,23 @@ instance Alternative StateMachine where
   a <|> Failure = a
   _ <|> _ = Failure
 
+-- * StateMachine
+
 char :: Char -> StateMachine Char
+-- ^ Accept a single character
 char c = More $ \c' -> if c == c'
   then (Just c, Success)
   else (Nothing, Failure)
 
 string :: String -> StateMachine String
+-- ^ Accept a sequential string
 string (c:cs) = pure (:) <*> char c <*> string cs
 string [] = pure []
+
+integer :: StateMachine Int
+-- ^ Accept an integer
+integer = integer' 0
+  where
+    integer' acc = More $ \c' -> if isDigit c'
+      then (Nothing, integer' $ acc * 10 + digitToInt c')
+      else (Just acc, Pass)

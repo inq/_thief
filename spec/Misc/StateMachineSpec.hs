@@ -5,7 +5,7 @@ import Control.Applicative (Alternative(..))
 
 import Misc.StateMachine
 
-runString :: String -> StateMachine String -> Maybe String
+runString :: String -> StateMachine a -> Maybe a
 runString (c:cs) cur = case next of
     Failure -> res
     More _ -> runString cs next
@@ -33,10 +33,16 @@ spec = describe "StateMachine" $ do
       s `shouldBe` Just "x"
   context "Applicative" $ do
     it "process a string" $ do
-      let f = runString "hello" $ string "hellu"
-          s = runString "hello" $ string "hello"
+      let f = runString "right" $ string "rirong"
+          s = runString "fail" $ string "fail"
+          s' = runString "abc123" $ string "abc1" <* string "23"
       f `shouldBe` Nothing
-      s `shouldBe` Just "hello"
+      s `shouldBe` Just "fail"
+      s' `shouldBe` Just "abc1"
+    it "process an integer" $ do
+      let p = string "--{" *> integer <* string "}--"
+          f = runString "--{64873}--" p
+      f `shouldBe` Just 64873
   context "Alternative" $ do
     it "process a string" $ do
       let f = runString "hihiho" $ string "hellu" <|> string "hihihi"

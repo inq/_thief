@@ -4,7 +4,7 @@ module Thief.Status
   , char
   ) where
 
-import Misc (Default(def))
+import Misc (Default(def), StateMachine(..), string)
 import qualified Thief.Raw.Result as Res
 import Data.Char
 
