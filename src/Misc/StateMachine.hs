@@ -14,79 +14,58 @@ import Debug.Trace (trace)
 
 data StateMachine a
   -- * More (Char -> (Result, Next))
-  = More { runMore :: Char -> (Maybe a, StateMachine a) }
-  -- * Func
-  | Func a
+  = More { runMore :: Char -> StateMachine a }
   -- * No more actions
-  | Success | Failure | Pass
+  | Success a | Pass a | Failure
 
 instance Show (StateMachine a) where
   show (More _) = "More *"
-  show (Func _) = "Func *"
-  show (Success) = "Success"
-  show (Failure) = "Failure"
-  show (Pass) = "Pass"
+  show (Success _) = "Success *"
+  show (Pass _) = "Pass *"
+  show Failure = "Failure"
 
 instance Functor StateMachine where
-  fmap f (More action) = More $ \c' ->
-    let (result, next) = action c'
-    in  (f <$> result, f <$> next)
-  fmap f (Func a) = Func $ f a
-  fmap _ Success = Success
+  fmap f (More action) = More $ \c' -> f <$> action c'
+  fmap f (Success a) = Success $ f a
+  fmap f (Pass a) = Pass $ f a
   fmap _ Failure = Failure
-  fmap _ Pass = Pass
 
 instance Applicative StateMachine where
-  pure f = Func f
-  Func a <*> Func b = Func (a b)
-  Func a <*> More actionB = More $ \c' ->
-    let (resultB, nextB) = actionB c'
-    in  (a <$> resultB, a <$> nextB)
-  More actionA <*> Func b = More $ \c' ->
-    let (resultA, nextA) = actionA c'
-    in  (resultA <*> pure b, nextA <*> pure b)
-  More actionA <*> More actionB = More $ \c' ->
-    let (resultB, nextB) = actionB c'
-    in case actionA c' of
-      (Just x, Success) -> (Nothing, pure x <*> More actionB)
-      (Just x, Pass)    -> (Just x <*> resultB, pure x <*> nextB)
-      (_, a)            -> (Nothing, a <*> More actionB)
-  Failure <*> _ = Failure
-  _ <*> Failure = Failure
-  a <*> b = Success
+  pure = Success
+  Success a <*> Success b = Success $ a b
+  Success a <*> More actionB = More $ \c' -> a <$> actionB c'
+  Success a <*> Pass b = Pass (a b)
+  More actionA <*> Success b = More $ \c' -> actionA c' <*> pure b
+  More actionA <*> More actionB = More $ \c' -> case actionA c' of
+      Pass x -> pure x <*> actionB c'
+      a      -> a <*> More actionB
+  _ <*> _ = Failure
 
 instance Alternative StateMachine where
   empty = Failure
-  More actionA <|> More actionB = More $ \c' ->
-    let (resultA, nextA) = actionA c'
-        (resultB, nextB) = actionB c'
-    in  (resultA <|> resultB, nextA <|> nextB)
-  More actionA <|> Success = More actionA -- TODO: Consider this
-  Failure <|> a = a
-  a <|> Failure = a
-  a <|> b = trace (show a ++  "|" ++  show b) Failure
+  More actionA <|> More actionB = More $ \c' -> actionA c' <|> actionB c'
+  More actionA <|> _ = More actionA
+  Success a <|> _ = Success a
+  _ <|> a = a
 
 -- * StateMachine
 
 char :: Char -> StateMachine Char
 -- ^ Accept a single character
-char c = More $ \c' -> if c == c'
-  then (Just c, Success)
-  else (Nothing, Failure)
+char c = More $ \c' -> if c == c' then Success c' else Failure
 
 anyChar :: StateMachine Char
 -- ^ Accept any character
-anyChar = More $ \c' -> (Just c', Success)
+anyChar = More $ \c' -> Success c'
 
 string :: String -> StateMachine String
 -- ^ Accept a sequential string
-string (c:cs) = pure (:) <*> char c <*> string cs
-string [] = pure []
+string = foldr (\c n -> (:) <$> char c <*> n) (pure [])
 
 integer :: StateMachine Int
 -- ^ Accept an integer
 integer = integer' 0
   where
     integer' acc = More $ \c' -> if isDigit c'
-      then (Nothing, integer' $ acc * 10 + digitToInt c')
-      else (Just acc, Pass)
+      then integer' $ acc * 10 + digitToInt c'
+      else Pass acc

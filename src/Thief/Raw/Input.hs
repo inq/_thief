@@ -24,9 +24,8 @@ inputLoop :: Chan Result -> IO ()
 inputLoop c = inputLoop' initialState
   where
     inputLoop' stat = do
-      (res, next) <- runMore stat <$> getChar
+      next <- runMore stat <$> getChar
       case next of
         More _ -> inputLoop' next
-        _ -> case res of
-          Just r -> writeChan c r >> inputLoop' initialState
-          _ -> inputLoop' initialState
+        Success a -> writeChan c a >> inputLoop' initialState
+        _ -> inputLoop' initialState

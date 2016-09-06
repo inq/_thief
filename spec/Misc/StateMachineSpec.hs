@@ -6,32 +6,36 @@ import Data.Char (toUpper)
 
 import Misc.StateMachine
 
+instance Eq a => Eq (StateMachine a) where
+  Success a == Success b = a == b
+  Pass a == Pass b = a == b
+  Failure == Failure = True
+  _ == _ = False
+
 runString :: String -> StateMachine a -> Maybe a
-runString (c:cs) cur = case next of
-    Failure -> res
-    More _ -> runString cs next
-    Success -> res
+runString (c:cs) cur = case runMore cur c of
+    n@(More _) -> runString cs n
+    Success a -> Just a
+    Failure -> Nothing
     _ -> error "cannot be here"
-  where
-    (res, next) = runMore cur c
 runString [] _ = Nothing
 
 spec :: Spec
 spec = describe "StateMachine" $ do
-  context "Basic" $ do
+  context "Basic" $
     it "parses single charactor" $ do
       let p = char 'x'
-          (f, _) = runMore p 'y'
-          (s, _) = runMore p 'x'
-      f `shouldBe` Nothing
-      s `shouldBe` Just 'x'
-  context "Functor" $ do
+          f = runMore p 'y'
+          s = runMore p 'x'
+      f `shouldBe` Failure
+      s `shouldBe` Success 'x'
+  context "Functor" $
     it "is a functor" $ do
       let p = (:[]) <$> char 'x'
-          (f, _) = runMore p 'y'
-          (s, _) = runMore p 'x'
-      f `shouldBe` Nothing
-      s `shouldBe` Just "x"
+          f = runMore p 'y'
+          s = runMore p 'x'
+      f `shouldBe` Failure
+      s `shouldBe` Success "x"
   context "Applicative" $ do
     it "process a string" $ do
       let f = runString "right" $ string "rirong"
@@ -44,7 +48,7 @@ spec = describe "StateMachine" $ do
       let p = string "--{" *> integer <* string "}--"
           f = runString "--{64873}--" p
       f `shouldBe` Just 64873
-  context "Alternative" $ do
+  context "Alternative" $
     it "process a string" $ do
       let f = runString "hihiho" $ string "hellu" <|> string "hihihi"
           s = runString "hello" $ string "hello" <|> string "hihihi"
