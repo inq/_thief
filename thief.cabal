@@ -23,6 +23,7 @@ library
                      , Misc.Default
                      , Misc.Color
                      , Misc
+                     , Misc.StateMachine
   other-modules:       Thief.Raw.FFI
                      , Thief.Raw.Input
                      , Thief.Raw.Signal
