@@ -23,9 +23,13 @@ import Thief.Raw (Event(..))
 
 type Handler = StateT Status (Writer String) ()
 
-exit :: String -> Handler
+exit :: Handler
 -- ^ Exit the handler
-exit msg = tell msg >> put Terminated
+exit = put Terminated
+
+throwError :: String -> Handler
+-- ^ Exit with error
+throwError msg = tell msg >> put Terminated
 
 handler :: Status -> Event -> Handler
 -- ^ The core handler
@@ -44,7 +48,7 @@ handler (Bare scr) e = case e of
                     { theX = x, theY = y
                     , theWidth = w, theHeight = h
                     }
-            Nothing -> exit "Internal Error"
+            Nothing -> throwError "Internal Error"
     _ -> return ()
 handler (Ready orig scr cur) e = case e of
     ipt@(ResizeScreen (Just (w, h))) -> do
@@ -56,13 +60,12 @@ handler (Ready orig scr cur) e = case e of
                  , getCursor = cur { theWidth = w, theHeight = h }
                  })
     ResizeScreen Nothing ->
-        exit "Cannot inpect the terminal"
+        throwError "Cannot inpect the terminal"
     Char 'q' ->
-        exit "Have a nice day!"
+        exit
     ipt -> do
         when (ipt == Char 'b') $ tell "BOX"
         tell $ moveCur $ moveCursor cur ipt
-        tell $ show ipt
         modify (\x -> x { getCursor = moveCursor cur ipt })
 
 handlerLoop :: Chan Event -> IO ()
@@ -72,11 +75,11 @@ handlerLoop c = loop c def
     loop c status = do
       ipt <- readChan c
       let ((_, res), str) = runWriter $ runStateT (handler status ipt) status
-      putStr str
       case res of
           Terminated -> case status of
               Ready orig _ _ -> do
-                 putStr rmcup
-                 putStr $ uncurry movexy orig
+                 putStr $ rmcup ++ uncurry movexy orig ++ str
               _ -> return ()
-          _ -> loop c res
+          _ -> do
+              putStr str
+              loop c res
