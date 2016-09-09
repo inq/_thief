@@ -3,6 +3,9 @@ module Thief.Handler
   ) where
 
 import Control.Monad (when)
+import Control.Concurrent.Chan (Chan, readChan)
+import Control.Monad.Writer (Writer, runWriter, tell)
+import Control.Monad.State (StateT, runStateT, get, put, modify)
 import Misc (def)
 import Thief.Term
   ( Printable(toAnsi)
@@ -12,9 +15,8 @@ import Thief.Term
   , smcup, rmcup, movexy, moveCur, queryCursorPos
   )
 import Thief.Handler.Status (Status(..))
-import Control.Concurrent.Chan (Chan, readChan)
-import Control.Monad.Writer (Writer, runWriter, tell)
-import Control.Monad.State (StateT, runStateT, get, put, modify)
+import Thief.UI.Screen (initScreen)
+import Thief.UI.Common (Drawable(draw), Size(..))
 import qualified Thief.Raw as Raw
 
 -- * Type Alises
@@ -36,16 +38,16 @@ handler (Bare scr) = handle
         tell smcup
         case scr of
             Just (w, h) -> do
+                let scr = initScreen $ MkSize w h
                 tell $ movexy 0 0
-                tell $ snd $ toAnsi def $
-                    borderedBuffer (invertBrush def) def w h
-                put $ Ready (x, y) def
+                tell $ snd $ toAnsi def $ draw scr
+                put $ Ready (x, y) scr def
                     { theX = x, theY = y
                     , theWidth = w, theHeight = h
                     }
             Nothing -> exit "Internal Error"
     handle _ = return ()
-handler (Ready orig cur) = handle
+handler (Ready orig scr cur) = handle
   where
     handle ipt@(Raw.Action (Raw.ResizeScreen (Just (w, h)))) = do
         tell $ movexy 0 0
@@ -72,7 +74,7 @@ handlerLoop c = loop c def
       putStr str
       case res of
           Terminated -> case status of
-              Ready orig _ -> do
+              Ready orig _ _ -> do
                  putStr rmcup
                  putStr $ uncurry movexy orig
               _ -> return ()

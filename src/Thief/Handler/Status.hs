@@ -4,6 +4,7 @@ module Thief.Handler.Status
 
 import Misc (Default(def))
 import Thief.Term.Cursor (Cursor)
+import Thief.UI.Screen (Screen)
 
 -- * Data Constructors
 
@@ -13,6 +14,7 @@ data Status
     }
   | Ready
     { initialCursor :: (Int, Int)
+    , getScreen :: Screen
     , getCursor :: Cursor
     }
   | Terminated

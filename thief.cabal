@@ -17,6 +17,9 @@ library
                      , Thief.Raw.Signal
                      , Thief.Raw.Result
                      , Thief.Raw
+                     , Thief.UI.Common
+                     , Thief.UI.Screen
+                     , Thief.UI.Window
                      , Thief.Handler
                      , Thief.Handler.Status
                      , Thief.Term.FFI
