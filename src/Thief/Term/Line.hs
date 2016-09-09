@@ -2,6 +2,7 @@ module Thief.Term.Line
   ( Line(..)
   , blankLine
   , borderedLine
+  , overlayLine
   , fromString
   , leftAligned
   ) where
@@ -45,6 +46,17 @@ borderedLine ebr ibr w
   where
     edge = MkChar ebr ' '
     inside = MkChar ibr ' '
+
+overlayLine :: Line -> Int -> Line -> Line
+-- ^ Draw a line on a line
+overlayLine (MkLine dst) x (MkLine src) =
+    MkLine $ overlay dst x src
+  where
+    overlay (d:ds) x (s:ss)
+      | x > 0     = d : overlay ds (x - 1) (s:ss)
+      | otherwise = s : overlay ds 0 ss
+    overlay d _ [] = d
+    overlay [] _ _ = []
 
 fromString :: Brush -> String -> Line
 -- ^ Make a line from given string

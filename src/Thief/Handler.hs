@@ -16,7 +16,7 @@ import Thief.Term
   )
 import Thief.Handler.Status (Status(..))
 import Thief.UI.Screen (initScreen)
-import Thief.UI.Common (Drawable(draw), Size(..))
+import Thief.UI.Common (Drawable(..), Size(..), Resizable(..))
 import qualified Thief.Raw as Raw
 
 -- * Type Alises
@@ -50,10 +50,13 @@ handler (Bare scr) = handle
 handler (Ready orig scr cur) = handle
   where
     handle ipt@(Raw.Action (Raw.ResizeScreen (Just (w, h)))) = do
+        let scr' = resize scr $ MkSize w h
         tell $ movexy 0 0
-        tell $ snd $ toAnsi def $
-            borderedBuffer (invertBrush def) def w h
-        modify (\x -> x { getCursor = cur { theWidth = w, theHeight = h } })
+        tell $ snd $ toAnsi def $ draw scr'
+        modify (\x -> x
+                 { getScreen = scr'
+                 , getCursor = cur { theWidth = w, theHeight = h }
+                 })
     handle (Raw.Action (Raw.ResizeScreen Nothing)) =
         exit "Cannot inpect the terminal"
     handle (Raw.Char 'q') =
