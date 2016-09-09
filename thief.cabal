@@ -15,8 +15,11 @@ library
   other-modules:       Thief.Raw.FFI
                      , Thief.Raw.Input
                      , Thief.Raw.Signal
-                     , Thief.Raw.Result
+                     , Thief.Raw.Event
                      , Thief.Raw
+                     , Thief.UI.Common
+                     , Thief.UI.Screen
+                     , Thief.UI.Window
                      , Thief.Handler
                      , Thief.Handler.Status
                      , Thief.Term.FFI
@@ -52,7 +55,7 @@ test-suite thief-test
   other-modules:       Thief.Raw.FFI
                      , Thief.Raw.Input
                      , Thief.Raw.Signal
-                     , Thief.Raw.Result
+                     , Thief.Raw.Event
                      , Thief.Raw
                      , Thief.Handler
                      , Thief.Handler.Status

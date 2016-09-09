@@ -4,7 +4,7 @@ module Thief.Term.Cursor
   ) where
 
 import Misc (Default(def))
-import Thief.Raw (Arrow(..), Result(..))
+import Thief.Raw (Event(KeyUp, KeyDown, KeyLeft, KeyRight))
 import Thief.Term.Brush (Brush)
 
 -- * Data Constructors
@@ -22,12 +22,12 @@ instance Default Cursor where
 
 -- * Cursor
 
-moveCursor :: Cursor -> Result -> Cursor
+moveCursor :: Cursor -> Event -> Cursor
 -- ^ Modify the cursor by the action
 moveCursor c@MkCursor { theX = x', theY = y' } = move'
   where
-    move' (Arrow AUp)    = c { theY = y' - 1}
-    move' (Arrow ADown)  = c { theY = y' + 1}
-    move' (Arrow ALeft)  = c { theX = x' - 1}
-    move' (Arrow ARight) = c { theX = x' + 1}
+    move' KeyUp    = c { theY = y' - 1}
+    move' KeyDown  = c { theY = y' + 1}
+    move' KeyLeft  = c { theX = x' - 1}
+    move' KeyRight = c { theX = x' + 1}
     move' _ = c

@@ -2,23 +2,23 @@ module Thief.Term.Buffer
   ( Buffer(..)
   , blankBuffer
   , borderedBuffer
+  , overlayBuffer
   ) where
 
-import Prelude hiding (lines)
 import Thief.Term.Brush (Brush(..))
 import Thief.Term.Classes (Printable(..))
-import Thief.Term.Line (Line(..), blankLine, borderedLine)
+import Thief.Term.Line (Line(..), blankLine, borderedLine, overlayLine)
 
 -- * Data Constructors
 
 data Buffer = MkBuffer
-  { lines :: [Line]
+  { getLines :: [Line]
   }
 
 instance Printable Buffer where
-  width = maximum . map width . lines
-  height = length . lines
-  toAnsi br (MkBuffer lines) = foldl convLine (br, "") lines
+  width = maximum . map width . getLines
+  height = length . getLines
+  toAnsi br (MkBuffer getLines) = foldl convLine (br, "") getLines
     where
       convLine (b, s) c = (nb, s ++ nc)
         where (nb, nc) = toAnsi b c
@@ -28,6 +28,18 @@ instance Printable Buffer where
 blankBuffer :: Brush -> Int -> Int -> Buffer
 -- ^ Make a rectangular buffer
 blankBuffer br w h = MkBuffer $ replicate h $ blankLine br w
+
+overlayBuffer :: Buffer -> Int -> Int -> Buffer -> Buffer
+-- ^ Draw a buffer on a buffer
+overlayBuffer (MkBuffer dst) x y (MkBuffer src) =
+    MkBuffer $ overlay dst x y src
+  where
+    overlay (d:ds) x y (s:ss)
+      | y > 0     = d : overlay ds x (y - 1) (s:ss)
+      | otherwise = overlayLine d x s : overlay ds x 0 ss
+    overlay d _ _ [] = d
+    overlay [] _ _ _ = []
+
 
 borderedBuffer :: Brush -> Brush -> Int -> Int -> Buffer
 -- ^ Make a bordered rectangular buffer

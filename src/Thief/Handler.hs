@@ -3,6 +3,9 @@ module Thief.Handler
   ) where
 
 import Control.Monad (when)
+import Control.Concurrent.Chan (Chan, readChan)
+import Control.Monad.Writer (Writer, runWriter, tell)
+import Control.Monad.State (StateT, runStateT, get, put, modify)
 import Misc (def)
 import Thief.Term
   ( Printable(toAnsi)
@@ -12,68 +15,71 @@ import Thief.Term
   , smcup, rmcup, movexy, moveCur, queryCursorPos
   )
 import Thief.Handler.Status (Status(..))
-import Control.Concurrent.Chan (Chan, readChan)
-import Control.Monad.Writer (Writer, runWriter, tell)
-import Control.Monad.State (StateT, runStateT, get, put, modify)
-import qualified Thief.Raw as Raw
+import Thief.UI.Screen (initScreen)
+import Thief.UI.Common (Drawable(..), Size(..), Resizable(..))
+import Thief.Raw (Event(..))
 
 -- * Type Alises
 
 type Handler = StateT Status (Writer String) ()
 
-exit :: String -> Handler
+exit :: Handler
 -- ^ Exit the handler
-exit msg = tell msg >> put Terminated
+exit = put Terminated
 
-handler :: Status -> Raw.Result -> Handler
+throwError :: String -> Handler
+-- ^ Exit with error
+throwError msg = tell msg >> put Terminated
+
+handler :: Status -> Event -> Handler
 -- ^ The core handler
-handler (Bare scr) = handle
-  where
-    handle (Raw.Action (Raw.ResizeScreen s)) = do
+handler (Bare scr) e = case e of
+    ResizeScreen s -> do
         tell queryCursorPos
         put $ Bare s
-    handle (Raw.Pair y x) = do
+    Pair y x -> do
         tell smcup
         case scr of
             Just (w, h) -> do
+                let scr = initScreen $ MkSize w h
                 tell $ movexy 0 0
-                tell $ snd $ toAnsi def $
-                    borderedBuffer (invertBrush def) def w h
-                put $ Ready (x, y) def
+                tell $ snd $ toAnsi def $ draw scr
+                put $ Ready (x, y) scr def
                     { theX = x, theY = y
                     , theWidth = w, theHeight = h
                     }
-            Nothing -> exit "Internal Error"
-    handle _ = return ()
-handler (Ready orig cur) = handle
-  where
-    handle ipt@(Raw.Action (Raw.ResizeScreen (Just (w, h)))) = do
+            Nothing -> throwError "Internal Error"
+    _ -> return ()
+handler (Ready orig scr cur) e = case e of
+    ipt@(ResizeScreen (Just (w, h))) -> do
+        let scr' = resize scr $ MkSize w h
         tell $ movexy 0 0
-        tell $ snd $ toAnsi def $
-            borderedBuffer (invertBrush def) def w h
-        modify (\x -> x { getCursor = cur { theWidth = w, theHeight = h } })
-    handle (Raw.Action (Raw.ResizeScreen Nothing)) =
-        exit "Cannot inpect the terminal"
-    handle (Raw.Char 'q') =
-        exit "Have a nice day!"
-    handle ipt = do
-        when (ipt == Raw.Char 'b') $ tell "BOX"
+        tell $ snd $ toAnsi def $ draw scr'
+        modify (\x -> x
+                 { getScreen = scr'
+                 , getCursor = cur { theWidth = w, theHeight = h }
+                 })
+    ResizeScreen Nothing ->
+        throwError "Cannot inpect the terminal"
+    Char 'q' ->
+        exit
+    ipt -> do
+        when (ipt == Char 'b') $ tell "BOX"
         tell $ moveCur $ moveCursor cur ipt
-        when (ipt /= Raw.None) $ tell $ show ipt
         modify (\x -> x { getCursor = moveCursor cur ipt })
 
-handlerLoop :: Chan Raw.Result -> IO ()
+handlerLoop :: Chan Event -> IO ()
 -- ^ The main loop
 handlerLoop c = loop c def
   where
     loop c status = do
       ipt <- readChan c
       let ((_, res), str) = runWriter $ runStateT (handler status ipt) status
-      putStr str
       case res of
           Terminated -> case status of
-              Ready orig _ -> do
-                 putStr rmcup
-                 putStr $ uncurry movexy orig
+              Ready orig _ _ -> do
+                 putStr $ rmcup ++ uncurry movexy orig ++ str
               _ -> return ()
-          _ -> loop c res
+          _ -> do
+              putStr str
+              loop c res
