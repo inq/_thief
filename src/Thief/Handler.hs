@@ -41,7 +41,7 @@ handler (Bare scr) e = case e of
         tell smcup
         case scr of
             Just (w, h) -> do
-                let scr = initScreen $ MkSize w h
+                let scr = initScreen def $ MkSize w h
                 tell $ movexy 0 0
                 tell $ snd $ toAnsi def $ draw scr
                 put $ Ready (x, y) scr def

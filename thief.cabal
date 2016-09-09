@@ -20,6 +20,8 @@ library
                      , Thief.UI.Common
                      , Thief.UI.Screen
                      , Thief.UI.Window
+                     , Thief.UI.Editor
+                     , Thief.UI.Theme
                      , Thief.Handler
                      , Thief.Handler.Status
                      , Thief.Term.FFI
