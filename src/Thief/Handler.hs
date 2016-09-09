@@ -17,7 +17,7 @@ import Thief.Term
 import Thief.Handler.Status (Status(..))
 import Thief.UI.Screen (initScreen)
 import Thief.UI.Common (Drawable(..), Size(..), Resizable(..))
-import qualified Thief.Raw as Raw
+import Thief.Raw (Event(..))
 
 -- * Type Alises
 
@@ -27,14 +27,13 @@ exit :: String -> Handler
 -- ^ Exit the handler
 exit msg = tell msg >> put Terminated
 
-handler :: Status -> Raw.Result -> Handler
+handler :: Status -> Event -> Handler
 -- ^ The core handler
-handler (Bare scr) = handle
-  where
-    handle (Raw.Action (Raw.ResizeScreen s)) = do
+handler (Bare scr) e = case e of
+    ResizeScreen s -> do
         tell queryCursorPos
         put $ Bare s
-    handle (Raw.Pair y x) = do
+    Pair y x -> do
         tell smcup
         case scr of
             Just (w, h) -> do
@@ -46,10 +45,9 @@ handler (Bare scr) = handle
                     , theWidth = w, theHeight = h
                     }
             Nothing -> exit "Internal Error"
-    handle _ = return ()
-handler (Ready orig scr cur) = handle
-  where
-    handle ipt@(Raw.Action (Raw.ResizeScreen (Just (w, h)))) = do
+    _ -> return ()
+handler (Ready orig scr cur) e = case e of
+    ipt@(ResizeScreen (Just (w, h))) -> do
         let scr' = resize scr $ MkSize w h
         tell $ movexy 0 0
         tell $ snd $ toAnsi def $ draw scr'
@@ -57,17 +55,17 @@ handler (Ready orig scr cur) = handle
                  { getScreen = scr'
                  , getCursor = cur { theWidth = w, theHeight = h }
                  })
-    handle (Raw.Action (Raw.ResizeScreen Nothing)) =
+    ResizeScreen Nothing ->
         exit "Cannot inpect the terminal"
-    handle (Raw.Char 'q') =
+    Char 'q' ->
         exit "Have a nice day!"
-    handle ipt = do
-        when (ipt == Raw.Char 'b') $ tell "BOX"
+    ipt -> do
+        when (ipt == Char 'b') $ tell "BOX"
         tell $ moveCur $ moveCursor cur ipt
-        when (ipt /= Raw.None) $ tell $ show ipt
+        tell $ show ipt
         modify (\x -> x { getCursor = moveCursor cur ipt })
 
-handlerLoop :: Chan Raw.Result -> IO ()
+handlerLoop :: Chan Event -> IO ()
 -- ^ The main loop
 handlerLoop c = loop c def
   where
