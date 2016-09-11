@@ -15,7 +15,7 @@ import Thief.Term
   , smcup, rmcup, movexy, moveCur, queryCursorPos
   )
 import Thief.Handler.Status (Status(..))
-import Thief.UI.Screen (initScreen)
+import Thief.UI.Screen (initScreen, rotateFocus)
 import Thief.UI.Common (Drawable(..), Size(..), Resizable(..))
 import Thief.Raw (Event(..))
 
@@ -54,7 +54,7 @@ handler (Ready orig scr cur) e = case e of
     ipt@(ResizeScreen (Just (w, h))) -> do
         let scr' = resize scr $ MkSize w h
         tell $ movexy 0 0
-        tell $ snd $ toAnsi def $ draw scr'
+        tell $ snd $ toAnsi def $ draw scr
         modify (\x -> x
                  { getScreen = scr'
                  , getCursor = cur { theWidth = w, theHeight = h }
@@ -63,6 +63,11 @@ handler (Ready orig scr cur) e = case e of
         throwError "Cannot inpect the terminal"
     Char 'q' ->
         exit
+    Char '\ETB' -> do
+        let scr' = rotateFocus scr
+        tell $ movexy 0 0
+        tell $ snd $ toAnsi def $ draw scr'
+        modify (\x -> x{ getScreen = scr' })
     ipt -> do
         when (ipt == Char 'b') $ tell "BOX"
         tell $ moveCur $ moveCursor cur ipt

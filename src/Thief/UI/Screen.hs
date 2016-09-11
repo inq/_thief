@@ -1,10 +1,16 @@
 module Thief.UI.Screen
   ( Screen(..)
   , initScreen
+  , rotateFocus
   ) where
 
 import Misc (Default(def))
-import Thief.UI.Common (Size(MkSize), Drawable(..), Resizable(..))
+import Thief.UI.Common
+  ( Size(MkSize)
+  , Drawable(..)
+  , Resizable(..)
+  , Focusable(setFocus, releaseFocus)
+  )
 import Thief.UI.Window (Window(MkWindow), initWindow)
 import Thief.UI.Theme (Theme(..))
 import Thief.Term.Buffer (blankBuffer, overlayBuffer)
@@ -38,6 +44,19 @@ initScreen :: Theme -> Size -> Screen
 initScreen theme = resize $ MkScreen undefined windows 0 theme
   where
     windows =
-      [ initWindow theme
+      [ setFocus $ initWindow theme
       , initWindow theme
       ]
+
+rotateFocus :: Screen -> Screen
+rotateFocus s@MkScreen{ getWindows = ws, getFocused = i } =
+    s{ getWindows = replace i i' ws, getFocused = i' }
+  where
+    i' = (i + 1) `mod` length ws
+    replace u s (a:as) = conv a : replace (u - 1) (s - 1) as
+      where
+        conv a
+          | u == 0 = releaseFocus a
+          | s == 0 = setFocus a
+          | otherwise = a
+    replace _ _ [] = []

@@ -2,6 +2,7 @@ module Thief.UI.Common
   ( Size(..)
   , Resizable(..)
   , Drawable(..)
+  , Focusable(..)
   ) where
 
 import Thief.Term.Buffer (Buffer(..))
@@ -15,3 +16,7 @@ class Resizable a where
 
 class Drawable a where
   draw :: a -> Buffer
+
+class Focusable a where
+  setFocus :: a -> a
+  releaseFocus :: a -> a
