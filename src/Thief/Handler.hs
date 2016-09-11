@@ -12,7 +12,7 @@ import Thief.Term
   , Cursor(theX, theY, theWidth, theHeight), moveCursor
   , invertBrush
   , borderedBuffer
-  , smcup, rmcup, movexy, moveCur, queryCursorPos
+  , civis, cvvis, smcup, rmcup, movexy, moveCur, queryCursorPos
   )
 import Thief.Handler.Status (Status(..))
 import Thief.UI.Screen (initScreen, rotateFocus)
@@ -53,8 +53,7 @@ handler (Bare scr) e = case e of
 handler (Ready orig scr cur) e = case e of
     ipt@(ResizeScreen (Just (w, h))) -> do
         let scr' = resize scr $ MkSize w h
-        tell $ movexy 0 0
-        tell $ snd $ toAnsi def $ draw scr
+        tell $ civis ++ movexy 0 0 ++ (snd $ toAnsi def $ draw scr') ++ cvvis ++ moveCur cur
         modify (\x -> x
                  { getScreen = scr'
                  , getCursor = cur { theWidth = w, theHeight = h }
@@ -65,8 +64,7 @@ handler (Ready orig scr cur) e = case e of
         exit
     Char '\ETB' -> do
         let scr' = rotateFocus scr
-        tell $ movexy 0 0
-        tell $ snd $ toAnsi def $ draw scr'
+        tell $ civis ++ movexy 0 0 ++ (snd $ toAnsi def $ draw scr') ++ cvvis ++ moveCur cur
         modify (\x -> x{ getScreen = scr' })
     ipt -> do
         when (ipt == Char 'b') $ tell "BOX"

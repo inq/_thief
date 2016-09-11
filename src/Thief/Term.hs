@@ -10,6 +10,8 @@ module Thief.Term
   , Buffer(..)
   , borderedBuffer
   -- * Ansi
+  , civis
+  , cvvis
   , smcup
   , rmcup
   , movexy
@@ -21,4 +23,4 @@ import Thief.Term.Classes (Printable(..))
 import Thief.Term.Cursor (Cursor(..), moveCursor)
 import Thief.Term.Brush (Brush, invertBrush)
 import Thief.Term.Buffer (Buffer, borderedBuffer)
-import Thief.Term.Ansi (smcup, rmcup, movexy, moveCur, queryCursorPos)
+import Thief.Term.Ansi (civis, cvvis, smcup, rmcup, movexy, moveCur, queryCursorPos)

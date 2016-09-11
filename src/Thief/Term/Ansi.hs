@@ -1,6 +1,8 @@
 module Thief.Term.Ansi
   ( smcup
   , rmcup
+  , civis
+  , cvvis
   , queryCursorPos
   , clearScreen
   , moveCur
@@ -19,6 +21,14 @@ smcup = "\ESC[?47h"
 rmcup :: String
 -- ^ Restore the original screen
 rmcup = "\ESC[?47l"
+
+civis :: String
+-- ^ Make cursor invisible
+civis = "\ESC[?25l"
+
+cvvis :: String
+-- ^ Make cursor visible
+cvvis = "\ESC[?25h"
 
 queryCursorPos :: String
 -- ^ Query the cursor position to the client
