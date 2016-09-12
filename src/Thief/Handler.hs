@@ -40,7 +40,6 @@ eventLoop c x y = loop
       case e of
         Char 'q' -> finalize
         _ -> do
-          putStr $ show e
           let scr' = event scr e
           putStr $ drawScreen scr'
           loop scr'

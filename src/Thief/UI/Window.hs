@@ -44,10 +44,16 @@ instance Editable Window where
       MkCoord x y = findCursor $ getEditor w
 
 instance Responsable Window where
-  event win@MkWindow{ getEditor = editor } (Resize w h) =
-      win{ getSize = MkSize w h, getEditor = editor' }
+  event win@MkWindow
+      { getEditor = editor
+      } = handle
     where
-      editor' = event editor $ Resize (w - 2) (h - 2)
+      handle (Resize w h) = win
+        { getSize = MkSize w h
+        , getEditor = event editor $ Resize (w - 2) (h -2)
+        }
+      handle e =
+        win{ getEditor = event editor e }
 
 instance Focusable Window where
   setFocus w = w{ getFocused = True }

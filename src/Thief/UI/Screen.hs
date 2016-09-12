@@ -56,18 +56,26 @@ instance Editable Screen where
       MkCoord x y = findCursor w
 
 instance Responsable Screen where
-  event scr = handle
+  event scr@MkScreen
+      { getSize = size
+      , getWindows = ws@[(c1, w1), (c2, w2)]
+      , getFocused = i
+      } = handle
     where
       handle (Resize w h) =
           scr{ getSize = MkSize w h, getWindows = [(c1', w1'), (c2', w2')] }
         where
-          MkScreen{ getWindows = [(c1, w1), (c2, w2)] } = scr
           c1' = MkCoord 1 1
           c2' = MkCoord (w `div` 2 + 1) 1
           w1' = event w1 $ Resize ((w - 3 + 1) `div` 2) (h - 2)
           w2' = event w2 $ Resize ((w - 3) `div` 2) (h - 2)
       handle (Char '\ETB') = rotateFocus scr
-      handle _ = scr
+      handle e = scr{ getWindows = eventFocused i ws }
+        where
+          eventFocused i ((c, w) : ws)
+            | i == 0 = (c, event w e) : ws
+            | otherwise = (c, w) : eventFocused (i - 1) ws
+          eventFocused _ _ = []
 
 drawScreen :: Screen -> String
 drawScreen scr = concat
