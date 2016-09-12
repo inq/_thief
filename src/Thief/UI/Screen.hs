@@ -2,6 +2,7 @@ module Thief.UI.Screen
   ( Screen(..)
   , initScreen
   , drawScreen
+  , diffScreen
   ) where
 
 import Misc (Default(def))
@@ -86,6 +87,17 @@ drawScreen scr = concat
     ,movexy (x + 1) (y + 1)
     ]
   where MkCoord x y = findCursor scr
+
+diffScreen :: Screen -> Screen -> String
+diffScreen p c = concat $ diff ++ [ movexy (x + 1) (y + 1) ]
+  where
+    diff = if ps == cs
+      then []
+      else
+        [ civis, movexy 0 0, cs, cvvis ]
+    ps = snd $ toAnsi def $ draw p
+    cs = snd $ toAnsi def $ draw c
+    MkCoord x y = findCursor c
 
 initScreen :: Theme -> Screen
 initScreen theme = MkScreen undefined windows 0 theme

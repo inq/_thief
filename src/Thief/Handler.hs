@@ -8,7 +8,7 @@ import Control.Monad.Writer (Writer, runWriter, tell)
 import Control.Monad.State (StateT, runStateT, get, put, modify)
 import Misc (def)
 import Thief.Handler.Status (Status(..))
-import Thief.UI.Screen (Screen, initScreen, drawScreen)
+import Thief.UI.Screen (Screen, initScreen, drawScreen, diffScreen)
 import Thief.UI.Common
   ( Drawable(..)
   , Size(..)
@@ -41,7 +41,7 @@ eventLoop c x y = loop
         Char 'q' -> finalize
         _ -> do
           let scr' = event scr e
-          putStr $ drawScreen scr'
+          putStr $ diffScreen scr scr'
           loop scr'
     finalize = putStr $ restore x y
 
