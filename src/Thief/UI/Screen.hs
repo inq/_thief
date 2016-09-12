@@ -5,12 +5,13 @@ module Thief.UI.Screen
   ) where
 
 import Misc (Default(def))
+import Thief.Raw (Event(..))
 import Thief.UI.Common
   ( Size(MkSize)
   , Coord(MkCoord)
   , Drawable(..)
   , Editable(findCursor)
-  , Resizable(..)
+  , Responsable(event)
   , Focusable(setFocus, releaseFocus)
   )
 import Thief.UI.Window (Window(MkWindow), initWindow)
@@ -46,19 +47,19 @@ instance Editable Screen where
       MkCoord x' y' = c
       MkCoord x y = findCursor w
 
-instance Resizable Screen where
-  resize scr s =
-      scr{ getSize = s, getWindows = [(c1', w1'), (c2', w2')] }
+instance Responsable Screen where
+  event scr (Resize w h) =
+      scr{ getSize = MkSize w h, getWindows = [(c1', w1'), (c2', w2')] }
     where
       MkScreen{ getWindows = [(c1, w1), (c2, w2)] } = scr
-      MkSize w h = s
       c1' = MkCoord 1 1
       c2' = MkCoord (w `div` 2 + 1) 1
-      w1' = resize w1 $ MkSize ((w - 3 + 1) `div` 2) (h - 2)
-      w2' = resize w2 $ MkSize ((w - 3) `div` 2) (h - 2)
+      w1' = event w1 $ Resize ((w - 3 + 1) `div` 2) (h - 2)
+      w2' = event w2 $ Resize ((w - 3) `div` 2) (h - 2)
+  event _ _ = undefined
 
-initScreen :: Theme -> Size -> Screen
-initScreen theme = resize $ MkScreen undefined windows 0 theme
+initScreen :: Theme -> Screen
+initScreen theme = MkScreen undefined windows 0 theme
   where
     windows =
       [ (undefined, setFocus $ initWindow theme)

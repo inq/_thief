@@ -19,7 +19,7 @@ import Thief.UI.Screen (initScreen, rotateFocus)
 import Thief.UI.Common
   ( Drawable(..)
   , Size(..)
-  , Resizable(..)
+  , Responsable(event)
   , Editable(..)
   , Coord(..)
   )
@@ -40,14 +40,14 @@ throwError msg = tell msg >> put Terminated
 handler :: Status -> Event -> Handler
 -- ^ The core handler
 handler (Bare scr) e = case e of
-    ResizeScreen s -> do
+    Resize w h -> do
         tell queryCursorPos
-        put $ Bare s
+        put $ Bare $ Just (w, h)
     Pair y x -> do
         tell smcup
         case scr of
             Just (w, h) -> do
-                let scr = initScreen def $ MkSize w h
+                let scr = event (initScreen def) $ Resize w h
                 tell $ movexy 0 0
                 tell $ snd $ toAnsi def $ draw scr
                 put $ Ready (x, y) scr def
@@ -57,15 +57,13 @@ handler (Bare scr) e = case e of
             Nothing -> throwError "Internal Error"
     _ -> return ()
 handler (Ready orig scr cur) e = case e of
-    ipt@(ResizeScreen (Just (w, h))) -> do
-        let scr' = resize scr $ MkSize w h
+    ipt@(Resize w h) -> do
+        let scr' = event scr (Resize w h)
         tell $ civis ++ movexy 0 0 ++ (snd $ toAnsi def $ draw scr') ++ cvvis ++ moveCur cur
         modify (\x -> x
                  { getScreen = scr'
                  , getCursor = cur { theWidth = w, theHeight = h }
                  })
-    ResizeScreen Nothing ->
-        throwError "Cannot inpect the terminal"
     Char 'q' ->
         exit
     Char '\ETB' -> do

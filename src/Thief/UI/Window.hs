@@ -8,10 +8,11 @@ import Thief.UI.Common
   ( Size(MkSize)
   , Drawable(..)
   , Editable(findCursor)
-  , Resizable(..)
   , Focusable(setFocus, releaseFocus)
+  , Responsable(event)
   , Coord(..)
   )
+import Thief.Raw (Event(..))
 import Thief.UI.Editor (Editor, initEditor)
 import Thief.UI.Theme (Theme(..))
 import Thief.Term.Buffer (blankBuffer, overlayBuffer)
@@ -42,11 +43,11 @@ instance Editable Window where
     where
       MkCoord x y = findCursor $ getEditor w
 
-instance Resizable Window where
-  resize win@MkWindow{ getEditor = editor } s@(MkSize w h) =
-      win{ getSize = s, getEditor = editor' }
+instance Responsable Window where
+  event win@MkWindow{ getEditor = editor } (Resize w h) =
+      win{ getSize = MkSize w h, getEditor = editor' }
     where
-      editor' = resize editor $ MkSize (w - 2) (h - 2)
+      editor' = event editor $ Resize (w - 2) (h - 2)
 
 instance Focusable Window where
   setFocus w = w{ getFocused = True }

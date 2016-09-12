@@ -8,9 +8,10 @@ import Thief.UI.Common
   ( Size(..)
   , Coord
   , Drawable(..)
-  , Resizable(..)
+  , Responsable(event)
   , Editable(findCursor)
   )
+import Thief.Raw (Event(..))
 import Thief.UI.Theme (Theme(editor))
 import Thief.Term.Buffer (blankBuffer)
 
@@ -26,8 +27,8 @@ instance Drawable Editor where
   draw e@(MkEditor size _ theme) = initBuf
     where initBuf = blankBuffer (editor theme) (getWidth size) (getHeight size)
 
-instance Resizable Editor where
-  resize e size = e { getSize = size }
+instance Responsable Editor where
+  event e (Resize w h) = e { getSize = MkSize w h }
 
 instance Editable Editor where
   findCursor = getCursor

@@ -4,9 +4,11 @@ module Thief.UI.Common
   , Resizable(..)
   , Drawable(..)
   , Focusable(..)
+  , Responsable(..)
   , Editable(..)
   ) where
 
+import Thief.Raw (Event)
 import Misc (Default(def))
 import Thief.Term.Buffer (Buffer(..))
 
@@ -20,6 +22,9 @@ data Coord = MkCoord { getX :: Int, getY :: Int }
 
 instance Default Coord where
   def = MkCoord 0 0
+
+class Responsable a where
+  event :: a -> Event -> a
 
 class Editable a where
   findCursor :: a -> Coord
