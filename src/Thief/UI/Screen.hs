@@ -7,7 +7,9 @@ module Thief.UI.Screen
 import Misc (Default(def))
 import Thief.UI.Common
   ( Size(MkSize)
+  , Coord(MkCoord)
   , Drawable(..)
+  , Editable(findCursor)
   , Resizable(..)
   , Focusable(setFocus, releaseFocus)
   )
@@ -20,23 +22,38 @@ import Thief.Term.Brush (invertBrush)
 
 data Screen = MkScreen
   { getSize :: Size
-  , getWindows :: [Window]
+  , getWindows :: [(Coord, Window)]
   , getFocused :: Int
   , getTheme :: Theme
   }
 
 instance Drawable Screen where
-  draw s@(MkScreen size [w1, w2] _ _) = buf''
+  draw scr = buf''
     where
+      MkScreen{ getSize = size, getWindows = [(c1, w1), (c2, w2)] } = scr
       MkSize w h = size
+      MkCoord x1 y1 = c1
+      MkCoord x2 y2 = c2
       buf = blankBuffer (invertBrush def) w h
-      buf' = overlayBuffer buf 1 1 $ draw w1
-      buf'' = overlayBuffer buf' (w `div` 2 + 1) 1 $ draw w2
+      buf' = overlayBuffer buf x1 y1 $ draw w1
+      buf'' = overlayBuffer buf' x2 y2 $ draw w2
+
+instance Editable Screen where
+  findCursor scr = MkCoord (x + x') (y + y')
+    where
+      MkScreen{ getWindows = ws, getFocused = f } = scr
+      (c, w) = ws !! f
+      MkCoord x' y' = c
+      MkCoord x y = findCursor w
 
 instance Resizable Screen where
-  resize (scr@MkScreen{ getWindows = [w1, w2] }) s@(MkSize w h) =
-      scr{ getSize = s, getWindows = [w1', w2'] }
+  resize scr s =
+      scr{ getSize = s, getWindows = [(c1', w1'), (c2', w2')] }
     where
+      MkScreen{ getWindows = [(c1, w1), (c2, w2)] } = scr
+      MkSize w h = s
+      c1' = MkCoord 1 1
+      c2' = MkCoord (w `div` 2 + 1) 1
       w1' = resize w1 $ MkSize ((w - 3 + 1) `div` 2) (h - 2)
       w2' = resize w2 $ MkSize ((w - 3) `div` 2) (h - 2)
 
@@ -44,8 +61,8 @@ initScreen :: Theme -> Size -> Screen
 initScreen theme = resize $ MkScreen undefined windows 0 theme
   where
     windows =
-      [ setFocus $ initWindow theme
-      , initWindow theme
+      [ (undefined, setFocus $ initWindow theme)
+      , (undefined, initWindow theme)
       ]
 
 rotateFocus :: Screen -> Screen
@@ -53,10 +70,10 @@ rotateFocus s@MkScreen{ getWindows = ws, getFocused = i } =
     s{ getWindows = replace i i' ws, getFocused = i' }
   where
     i' = (i + 1) `mod` length ws
-    replace u s (a:as) = conv a : replace (u - 1) (s - 1) as
+    replace u s ((c, a):as) = conv (c, a) : replace (u - 1) (s - 1) as
       where
-        conv a
-          | u == 0 = releaseFocus a
-          | s == 0 = setFocus a
-          | otherwise = a
+        conv (c, a)
+          | u == 0 = (c, releaseFocus a)
+          | s == 0 = (c, setFocus a)
+          | otherwise = (c, a)
     replace _ _ [] = []

@@ -7,8 +7,10 @@ import Misc (Default(def))
 import Thief.UI.Common
   ( Size(MkSize)
   , Drawable(..)
+  , Editable(findCursor)
   , Resizable(..)
   , Focusable(setFocus, releaseFocus)
+  , Coord(..)
   )
 import Thief.UI.Editor (Editor, initEditor)
 import Thief.UI.Theme (Theme(..))
@@ -34,6 +36,11 @@ instance Drawable Window where
         else windowUnFocused theme
       buf = blankBuffer fillColor w h
       buf' = overlayBuffer buf 1 1 $ draw editor
+
+instance Editable Window where
+  findCursor w = MkCoord (x + 1) (y + 1)
+    where
+      MkCoord x y = findCursor $ getEditor w
 
 instance Resizable Window where
   resize win@MkWindow{ getEditor = editor } s@(MkSize w h) =

@@ -16,7 +16,13 @@ import Thief.Term
   )
 import Thief.Handler.Status (Status(..))
 import Thief.UI.Screen (initScreen, rotateFocus)
-import Thief.UI.Common (Drawable(..), Size(..), Resizable(..))
+import Thief.UI.Common
+  ( Drawable(..)
+  , Size(..)
+  , Resizable(..)
+  , Editable(..)
+  , Coord(..)
+  )
 import Thief.Raw (Event(..))
 
 -- * Type Alises
@@ -64,7 +70,8 @@ handler (Ready orig scr cur) e = case e of
         exit
     Char '\ETB' -> do
         let scr' = rotateFocus scr
-        tell $ civis ++ movexy 0 0 ++ (snd $ toAnsi def $ draw scr') ++ cvvis ++ moveCur cur
+        let MkCoord x y = findCursor scr
+        tell $ civis ++ movexy 0 0 ++ (snd $ toAnsi def $ draw scr') ++ cvvis ++ movexy (x + 1) (y + 1)
         modify (\x -> x{ getScreen = scr' })
     ipt -> do
         when (ipt == Char 'b') $ tell "BOX"
