@@ -13,6 +13,7 @@ import Thief.UI.Common
   , Drawable(..)
   , Editable(findCursor)
   , Responsable(event)
+  , Result(Refresh)
   , Focusable(setFocus, releaseFocus)
   )
 import Thief.UI.Window (Window(MkWindow), initWindow)
@@ -64,19 +65,31 @@ instance Responsable Screen where
       } = handle
     where
       handle (Resize w h) =
-          scr{ getSize = MkSize w h, getWindows = [(c1', w1'), (c2', w2')] }
+          ( scr{ getSize = MkSize w h, getWindows = [(c1', w1'), (c2', w2')] }
+          , [Refresh]
+          )
         where
           c1' = MkCoord 1 1
           c2' = MkCoord (w `div` 2 + 1) 1
-          w1' = event w1 $ Resize ((w - 3 + 1) `div` 2) (h - 2)
-          w2' = event w2 $ Resize ((w - 3) `div` 2) (h - 2)
-      handle (Char '\ETB') = rotateFocus scr
-      handle e = scr{ getWindows = eventFocused i ws }
+          (w1', r1) = event w1 $ Resize ((w - 3 + 1) `div` 2) (h - 2)
+          (w2', r2) = event w2 $ Resize ((w - 3) `div` 2) (h - 2)
+      handle (Char '\ETB') =
+          ( rotateFocus scr
+          , [Refresh]
+          )
+      handle e =
+          ( scr{ getWindows = ws' }
+          , res
+          )
         where
+          (res, ws') = eventFocused i ws
           eventFocused i ((c, w) : ws)
-            | i == 0 = (c, event w e) : ws
-            | otherwise = (c, w) : eventFocused (i - 1) ws
-          eventFocused _ _ = []
+            | i == 0 = (res', (c, w') : ws)
+            | otherwise = append' (c, w) (eventFocused (i - 1) ws)
+            where
+              (w', res') = event w e
+              append' a (b, c) = (b, a : c)
+          eventFocused _ _ = ([], [])
 
 drawScreen :: Screen -> String
 drawScreen scr = concat

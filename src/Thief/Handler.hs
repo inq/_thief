@@ -15,6 +15,7 @@ import Thief.UI.Common
   , Responsable(event)
   , Editable(..)
   , Coord(..)
+  , Result(Refresh)
   )
 import Thief.Raw (Event(..))
 import Thief.Term.Ansi (smcup, restore, queryCursorPos)
@@ -40,8 +41,10 @@ eventLoop c x y = loop
       case e of
         Char 'q' -> finalize
         _ -> do
-          let scr' = event scr e
-          putStr $ diffScreen scr scr'
+          let (scr', act) = event scr e
+          case act of
+              [Refresh] -> putStr $ drawScreen scr'
+              as -> putStr $ concatMap show as
           loop scr'
     finalize = putStr $ restore x y
 
@@ -61,7 +64,7 @@ initLoop c = receiveSize
       case e of
         Pair y x -> do
           putStr smcup
-          let scr = event (initScreen def) $ Resize w h
+          let (scr, act) = event (initScreen def) $ Resize w h
           putStr $ drawScreen scr
           eventLoop c x y scr
         _ -> putStrLn "COULD NOT RECEIVE CURSOR"

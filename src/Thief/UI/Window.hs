@@ -10,6 +10,7 @@ import Thief.UI.Common
   , Editable(findCursor)
   , Focusable(setFocus, releaseFocus)
   , Responsable(event)
+  , Result(Refresh)
   , Coord(..)
   )
 import Thief.Raw (Event(..))
@@ -48,12 +49,21 @@ instance Responsable Window where
       { getEditor = editor
       } = handle
     where
-      handle (Resize w h) = win
-        { getSize = MkSize w h
-        , getEditor = event editor $ Resize (w - 2) (h -2)
-        }
+      handle (Resize w h) =
+          ( win
+            { getSize = MkSize w h
+            , getEditor = editor'
+            }
+          , [Refresh]
+          )
+        where
+          (editor', res) = event editor $ Resize (w - 2) (h - 2)
       handle e =
-        win{ getEditor = event editor e }
+          ( win{ getEditor = editor' }
+          , res
+          )
+        where
+          (editor', res) = event editor e
 
 instance Focusable Window where
   setFocus w = w{ getFocused = True }

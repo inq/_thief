@@ -10,6 +10,7 @@ import Thief.UI.Common
   , Drawable(..)
   , Responsable(event)
   , Editable(findCursor)
+  , Result(..)
   )
 import Thief.Raw (Event(..))
 import Thief.UI.Theme (Theme(editor))
@@ -40,12 +41,22 @@ instance Responsable Editor where
         | y < 0 = 0
         | y >= h = h - 1
         | otherwise = y
-      handle (Resize w' h') = ed{ getSize = MkSize w' h' }
-      handle KeyUp    = ed{ getCursor = mkCoord x (y - 1) }
-      handle KeyDown  = ed{ getCursor = mkCoord x (y + 1) }
-      handle KeyLeft  = ed{ getCursor = mkCoord (x - 1) y }
-      handle KeyRight = ed{ getCursor = mkCoord (x + 1) y }
-      handle (Char c) = ed
+      handle (Resize w' h') = (ed{ getSize = MkSize w' h' }, [Refresh])
+      handle KeyUp    = ( ed{ getCursor = mkCoord x (y - 1) }
+                        , [RMoveUp 1 | y > 0]
+                        )
+      handle KeyDown  = ( ed{ getCursor = mkCoord x (y + 1) }
+                        , [RMoveDown 1 | y < h - 1]
+                        )
+      handle KeyLeft  = ( ed{ getCursor = mkCoord (x - 1) y }
+                        , [RMoveLeft 1 | x > 0]
+                        )
+      handle KeyRight = ( ed{ getCursor = mkCoord (x + 1) y }
+                        , [RMoveRight 1 | x < w - 1]
+                        )
+      handle (Char c) = ( ed
+                        , [RChar c]
+                        )
 
 instance Editable Editor where
   findCursor = getCursor
