@@ -4,7 +4,15 @@ module Thief.UI.Window
   ) where
 
 import Misc (Default(def))
-import Thief.UI.Common (Size(MkSize), Drawable(..), Resizable(..))
+import Thief.UI.Common
+  ( Size(MkSize)
+  , Drawable(..)
+  , Editable(findCursor)
+  , Focusable(setFocus, releaseFocus)
+  , Responsable(event)
+  , Coord(..)
+  )
+import Thief.Raw (Event(..))
 import Thief.UI.Editor (Editor, initEditor)
 import Thief.UI.Theme (Theme(..))
 import Thief.Term.Buffer (blankBuffer, overlayBuffer)
@@ -15,19 +23,38 @@ data Window = MkWindow
   { getSize :: Size
   , getEditor :: Editor
   , getTheme :: Theme
+  , getFocused :: Bool
   }
 
 initWindow :: Theme -> Window
-initWindow theme = MkWindow undefined (initEditor theme) theme
+initWindow theme = MkWindow undefined (initEditor theme) theme False
 
 instance Drawable Window where
-  draw (MkWindow (MkSize w h) editor theme) = buf'
+  draw (MkWindow (MkSize w h) editor theme focused) = buf'
     where
-      buf = blankBuffer def w h
+      fillColor = if focused
+        then windowFocused theme
+        else windowUnFocused theme
+      buf = blankBuffer fillColor w h
       buf' = overlayBuffer buf 1 1 $ draw editor
 
-instance Resizable Window where
-  resize win@MkWindow{ getEditor = editor } s@(MkSize w h) =
-      win{ getSize = s, getEditor = editor' }
+instance Editable Window where
+  findCursor w = MkCoord (x + 1) (y + 1)
     where
-      editor' = resize editor $ MkSize (w - 2) (h - 2)
+      MkCoord x y = findCursor $ getEditor w
+
+instance Responsable Window where
+  event win@MkWindow
+      { getEditor = editor
+      } = handle
+    where
+      handle (Resize w h) = win
+        { getSize = MkSize w h
+        , getEditor = event editor $ Resize (w - 2) (h -2)
+        }
+      handle e =
+        win{ getEditor = event editor e }
+
+instance Focusable Window where
+  setFocus w = w{ getFocused = True }
+  releaseFocus w = w{ getFocused = False }

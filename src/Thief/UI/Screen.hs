@@ -1,43 +1,121 @@
 module Thief.UI.Screen
   ( Screen(..)
   , initScreen
+  , drawScreen
+  , diffScreen
   ) where
 
 import Misc (Default(def))
-import Thief.UI.Common (Size(MkSize), Drawable(..), Resizable(..))
+import Thief.Raw (Event(..))
+import Thief.UI.Common
+  ( Size(MkSize)
+  , Coord(MkCoord)
+  , Drawable(..)
+  , Editable(findCursor)
+  , Responsable(event)
+  , Focusable(setFocus, releaseFocus)
+  )
 import Thief.UI.Window (Window(MkWindow), initWindow)
 import Thief.UI.Theme (Theme(..))
 import Thief.Term.Buffer (blankBuffer, overlayBuffer)
 import Thief.Term.Brush (invertBrush)
+import Thief.Term
+  ( Printable(toAnsi)
+  , Cursor(theX, theY, theWidth, theHeight), moveCursor
+  , invertBrush
+  , borderedBuffer
+  , civis, cvvis, movexy, moveCur
+  )
+
 
 -- * Data Constructors
 
 data Screen = MkScreen
   { getSize :: Size
-  , getWindows :: [Window]
+  , getWindows :: [(Coord, Window)]
   , getFocused :: Int
   , getTheme :: Theme
   }
 
 instance Drawable Screen where
-  draw s@(MkScreen size [w1, w2] _ _) = buf''
+  draw scr = buf''
     where
+      MkScreen{ getSize = size, getWindows = [(c1, w1), (c2, w2)] } = scr
       MkSize w h = size
+      MkCoord x1 y1 = c1
+      MkCoord x2 y2 = c2
       buf = blankBuffer (invertBrush def) w h
-      buf' = overlayBuffer buf 1 1 $ draw w1
-      buf'' = overlayBuffer buf' (w `div` 2 + 1) 1 $ draw w2
+      buf' = overlayBuffer buf x1 y1 $ draw w1
+      buf'' = overlayBuffer buf' x2 y2 $ draw w2
 
-instance Resizable Screen where
-  resize (scr@MkScreen{ getWindows = [w1, w2] }) s@(MkSize w h) =
-      scr{ getSize = s, getWindows = [w1', w2'] }
+instance Editable Screen where
+  findCursor scr = MkCoord (x + x') (y + y')
     where
-      w1' = resize w1 $ MkSize ((w - 3 + 1) `div` 2) (h - 2)
-      w2' = resize w2 $ MkSize ((w - 3) `div` 2) (h - 2)
+      MkScreen{ getWindows = ws, getFocused = f } = scr
+      (c, w) = ws !! f
+      MkCoord x' y' = c
+      MkCoord x y = findCursor w
 
-initScreen :: Theme -> Size -> Screen
-initScreen theme = resize $ MkScreen undefined windows 0 theme
+instance Responsable Screen where
+  event scr@MkScreen
+      { getSize = size
+      , getWindows = ws@[(c1, w1), (c2, w2)]
+      , getFocused = i
+      } = handle
+    where
+      handle (Resize w h) =
+          scr{ getSize = MkSize w h, getWindows = [(c1', w1'), (c2', w2')] }
+        where
+          c1' = MkCoord 1 1
+          c2' = MkCoord (w `div` 2 + 1) 1
+          w1' = event w1 $ Resize ((w - 3 + 1) `div` 2) (h - 2)
+          w2' = event w2 $ Resize ((w - 3) `div` 2) (h - 2)
+      handle (Char '\ETB') = rotateFocus scr
+      handle e = scr{ getWindows = eventFocused i ws }
+        where
+          eventFocused i ((c, w) : ws)
+            | i == 0 = (c, event w e) : ws
+            | otherwise = (c, w) : eventFocused (i - 1) ws
+          eventFocused _ _ = []
+
+drawScreen :: Screen -> String
+drawScreen scr = concat
+    [ civis
+    , movexy 0 0
+    , snd $ toAnsi def $ draw scr
+    , cvvis
+    ,movexy (x + 1) (y + 1)
+    ]
+  where MkCoord x y = findCursor scr
+
+diffScreen :: Screen -> Screen -> String
+diffScreen p c = concat $ diff ++ [ movexy (x + 1) (y + 1) ]
+  where
+    diff = if ps == cs
+      then []
+      else
+        [ civis, movexy 0 0, cs, cvvis ]
+    ps = snd $ toAnsi def $ draw p
+    cs = snd $ toAnsi def $ draw c
+    MkCoord x y = findCursor c
+
+initScreen :: Theme -> Screen
+initScreen theme = MkScreen undefined windows 0 theme
   where
     windows =
-      [ initWindow theme
-      , initWindow theme
+      [ (undefined, setFocus $ initWindow theme)
+      , (undefined, initWindow theme)
       ]
+
+rotateFocus :: Screen -> Screen
+rotateFocus s@MkScreen{ getWindows = ws, getFocused = i } =
+    s{ getWindows = replace i i' ws, getFocused = i' }
+  where
+    i' = (i + 1) `mod` length ws
+    replace u s ((c, a):as) = conv (c, a) : replace (u - 1) (s - 1) as
+      where
+        conv (c, a)
+          | u == 0 = (c, releaseFocus a)
+          | s == 0 = (c, setFocus a)
+          | otherwise = (c, a)
+    replace _ _ [] = []
