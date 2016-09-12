@@ -8,11 +8,16 @@ module Thief.Term.Ansi
   , moveCur
   , movexy
   , changeBrush
+  , restore
   ) where
 
 import Thief.Term.Brush (Brush(..))
 import Thief.Term.Cursor (Cursor(..))
 import Misc (Color)
+
+restore :: Int -> Int -> String
+-- ^ Restore the original screen & recover the cursor
+restore x y = rmcup ++ movexy x y
 
 smcup :: String
 -- ^ Clear the screen

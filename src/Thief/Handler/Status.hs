@@ -15,7 +15,6 @@ data Status
   | Ready
     { initialCursor :: (Int, Int)
     , getScreen :: Screen
-    , getCursor :: Cursor
     }
   | Terminated
 

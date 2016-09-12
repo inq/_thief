@@ -1,7 +1,7 @@
 module Thief.UI.Screen
   ( Screen(..)
   , initScreen
-  , rotateFocus
+  , drawScreen
   ) where
 
 import Misc (Default(def))
@@ -18,6 +18,14 @@ import Thief.UI.Window (Window(MkWindow), initWindow)
 import Thief.UI.Theme (Theme(..))
 import Thief.Term.Buffer (blankBuffer, overlayBuffer)
 import Thief.Term.Brush (invertBrush)
+import Thief.Term
+  ( Printable(toAnsi)
+  , Cursor(theX, theY, theWidth, theHeight), moveCursor
+  , invertBrush
+  , borderedBuffer
+  , civis, cvvis, movexy, moveCur
+  )
+
 
 -- * Data Constructors
 
@@ -48,15 +56,28 @@ instance Editable Screen where
       MkCoord x y = findCursor w
 
 instance Responsable Screen where
-  event scr (Resize w h) =
-      scr{ getSize = MkSize w h, getWindows = [(c1', w1'), (c2', w2')] }
+  event scr = handle
     where
-      MkScreen{ getWindows = [(c1, w1), (c2, w2)] } = scr
-      c1' = MkCoord 1 1
-      c2' = MkCoord (w `div` 2 + 1) 1
-      w1' = event w1 $ Resize ((w - 3 + 1) `div` 2) (h - 2)
-      w2' = event w2 $ Resize ((w - 3) `div` 2) (h - 2)
-  event _ _ = undefined
+      handle (Resize w h) =
+          scr{ getSize = MkSize w h, getWindows = [(c1', w1'), (c2', w2')] }
+        where
+          MkScreen{ getWindows = [(c1, w1), (c2, w2)] } = scr
+          c1' = MkCoord 1 1
+          c2' = MkCoord (w `div` 2 + 1) 1
+          w1' = event w1 $ Resize ((w - 3 + 1) `div` 2) (h - 2)
+          w2' = event w2 $ Resize ((w - 3) `div` 2) (h - 2)
+      handle (Char '\ETB') = rotateFocus scr
+      handle _ = scr
+
+drawScreen :: Screen -> String
+drawScreen scr = concat
+    [ civis
+    , movexy 0 0
+    , snd $ toAnsi def $ draw scr
+    , cvvis
+    ,movexy (x + 1) (y + 1)
+    ]
+  where MkCoord x y = findCursor scr
 
 initScreen :: Theme -> Screen
 initScreen theme = MkScreen undefined windows 0 theme
