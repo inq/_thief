@@ -16,6 +16,7 @@ import Thief.UI.Common
   , Result(Refresh)
   , Focusable(setFocus, releaseFocus)
   )
+import Thief.UI.CommandBar (CommandBar, initCommandBar)
 import Thief.UI.Window (Window(MkWindow), initWindow)
 import Thief.UI.Theme (Theme(..))
 import Thief.Term.Buffer (blankBuffer, overlayBuffer)
@@ -34,20 +35,27 @@ import Thief.Term
 data Screen = MkScreen
   { getSize :: Size
   , getWindows :: [(Coord, Window)]
+  , getCommandBar :: (Coord, CommandBar)
   , getFocused :: Int
   , getTheme :: Theme
   }
 
 instance Drawable Screen where
-  draw scr = buf''
+  draw scr = buf'''
     where
-      MkScreen{ getSize = size, getWindows = [(c1, w1), (c2, w2)] } = scr
+      MkScreen
+        { getSize = size
+        , getWindows = [(c1, w1), (c2, w2)]
+        , getCommandBar = (c3, b3)
+        } = scr
       MkSize w h = size
       MkCoord x1 y1 = c1
       MkCoord x2 y2 = c2
+      MkCoord x3 y3 = c3
       buf = blankBuffer (invertBrush def) w h
       buf' = overlayBuffer buf x1 y1 $ draw w1
       buf'' = overlayBuffer buf' x2 y2 $ draw w2
+      buf''' = overlayBuffer buf'' x3 y3 $ draw b3
 
 instance Editable Screen where
   findCursor scr = MkCoord (x + x') (y + y')
@@ -61,18 +69,25 @@ instance Responsable Screen where
   event scr@MkScreen
       { getSize = size
       , getWindows = ws@[(c1, w1), (c2, w2)]
+      , getCommandBar = (c3, w3)
       , getFocused = i
       } = handle
     where
       handle (Resize w h) =
-          ( scr{ getSize = MkSize w h, getWindows = [(c1', w1'), (c2', w2')] }
+          ( scr
+            { getSize = MkSize w h
+            , getWindows = [(c1', w1'), (c2', w2')]
+            , getCommandBar = (c3', w3')
+            }
           , [Refresh]
           )
         where
           c1' = MkCoord 1 1
           c2' = MkCoord (w `div` 2 + 1) 1
+          c3' = MkCoord 0 (h - 1)
           (w1', r1) = event w1 $ Resize ((w - 3 + 1) `div` 2) (h - 2)
           (w2', r2) = event w2 $ Resize ((w - 3) `div` 2) (h - 2)
+          (w3', r3) = event w3 $ Resize w 1
       handle (Char '\ETB') =
           ( rotateFocus scr
           , [Refresh]
@@ -113,12 +128,13 @@ diffScreen p c = concat $ diff ++ [ movexy (x + 1) (y + 1) ]
     MkCoord x y = findCursor c
 
 initScreen :: Theme -> Screen
-initScreen theme = MkScreen undefined windows 0 theme
+initScreen theme = MkScreen undefined windows cb 0 theme
   where
     windows =
       [ (undefined, setFocus $ initWindow theme)
       , (undefined, initWindow theme)
       ]
+    cb = (undefined, initCommandBar theme)
 
 rotateFocus :: Screen -> Screen
 rotateFocus s@MkScreen{ getWindows = ws, getFocused = i } =

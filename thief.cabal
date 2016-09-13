@@ -18,6 +18,7 @@ library
                      , Thief.Raw.Event
                      , Thief.Raw
                      , Thief.UI.Common
+                     , Thief.UI.CommandBar
                      , Thief.UI.Screen
                      , Thief.UI.Window
                      , Thief.UI.Editor
