@@ -13,7 +13,7 @@ import Thief.UI.Common
   , Result(Refresh)
   , Coord(..)
   )
-import Thief.Raw (Event(..))
+import Thief.UI.Event (Event(..))
 import Thief.UI.Editor (Editor, initEditor)
 import Thief.UI.Theme (Theme(..))
 import Thief.Term.Buffer (blankBuffer, overlayBuffer)

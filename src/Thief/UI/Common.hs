@@ -9,7 +9,7 @@ module Thief.UI.Common
   , Result(..)
   ) where
 
-import Thief.Raw (Event)
+import Thief.UI.Event (Event)
 import Misc (Default(def))
 import Thief.Term.Buffer (Buffer(..))
 
@@ -22,18 +22,21 @@ data Size = MkSize { getWidth :: Int, getHeight :: Int }
 data Coord = MkCoord { getX :: Int, getY :: Int }
 
 data Result
-  = RMoveUp Int
-  | RMoveDown Int
-  | RMoveLeft Int
-  | RMoveRight Int
+  = RMove Int Int
   | RChar Char
   | Refresh
 
 instance Show Result where
-  show (RMoveUp i) = "\ESC[" ++ show i ++ "A"
-  show (RMoveDown i) = "\ESC[" ++ show i ++ "B"
-  show (RMoveLeft i) = "\ESC[" ++ show i ++ "D"
-  show (RMoveRight i) = "\ESC[" ++ show i ++ "C"
+  show (RMove i j) = horz i ++ vert j
+    where
+      horz x
+        | x < 0 = "\ESC[" ++ show (-x) ++ "D"
+        | x > 0 = "\ESC[" ++ show x ++ "C"
+        | otherwise = ""
+      vert y
+        | y < 0 = "\ESC[" ++ show (-y) ++ "A"
+        | y > 0 = "\ESC[" ++ show y ++ "B"
+        | otherwise = ""
   show (RChar c) = [c]
   show Refresh = []
 

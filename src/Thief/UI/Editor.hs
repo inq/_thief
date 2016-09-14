@@ -12,7 +12,7 @@ import Thief.UI.Common
   , Editable(findCursor)
   , Result(..)
   )
-import Thief.Raw (Event(..))
+import Thief.UI.Event (Event(..))
 import Thief.UI.Theme (Theme(editor))
 import Thief.Term.Buffer (blankBuffer)
 
@@ -32,31 +32,22 @@ instance Responsable Editor where
   event ed = handle
     where
       MkEditor { getSize = MkSize w h, getCursor = MkCoord x y } = ed
-      mkCoord x y = MkCoord (insideX x) (insideY y)
-      insideX x
-        | x < 0 = 0
-        | x >= w = w - 1
-        | otherwise = x
-      insideY y
-        | y < 0 = 0
-        | y >= h = h - 1
-        | otherwise = y
       handle (Resize w' h') = (ed{ getSize = MkSize w' h' }, [Refresh])
-      handle KeyUp    = ( ed{ getCursor = mkCoord x (y - 1) }
-                        , [RMoveUp 1 | y > 0]
-                        )
-      handle KeyDown  = ( ed{ getCursor = mkCoord x (y + 1) }
-                        , [RMoveDown 1 | y < h - 1]
-                        )
-      handle KeyLeft  = ( ed{ getCursor = mkCoord (x - 1) y }
-                        , [RMoveLeft 1 | x > 0]
-                        )
-      handle KeyRight = ( ed{ getCursor = mkCoord (x + 1) y }
-                        , [RMoveRight 1 | x < w - 1]
-                        )
-      handle (Char c) = ( ed
-                        , [RChar c]
-                        )
+      handle (Move dx dy) =
+          ( ed{ getCursor = MkCoord nx ny }
+          , [RMove (nx - x) (ny - y)]
+          )
+        where
+          nx = inside 0 (w - 1) (x + dx)
+          ny = inside 0 (h - 1) (y + dy)
+          inside min max num
+            | num < min = min
+            | num > max = max
+            | otherwise = num
+      handle (Char c) =
+          ( ed
+          , [RChar c]
+          )
 
 instance Editable Editor where
   findCursor = getCursor

@@ -6,7 +6,7 @@ module Thief.UI.Screen
   ) where
 
 import Misc (Default(def))
-import Thief.Raw (Event(..))
+import Thief.UI.Event (Event(..))
 import Thief.UI.Common
   ( Size(MkSize)
   , Coord(MkCoord)
@@ -28,7 +28,6 @@ import Thief.Term
   , borderedBuffer
   , civis, cvvis, movexy, moveCur
   )
-
 
 -- * Data Constructors
 
@@ -88,7 +87,7 @@ instance Responsable Screen where
           (w1', r1) = event w1 $ Resize ((w - 3 + 1) `div` 2) (h - 2)
           (w2', r2) = event w2 $ Resize ((w - 3) `div` 2) (h - 2)
           (w3', r3) = event w3 $ Resize w 1
-      handle (Char '\ETB') =
+      handle (Ctrl 'w') =
           ( rotateFocus scr
           , [Refresh]
           )

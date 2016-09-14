@@ -22,6 +22,7 @@ library
                      , Thief.UI.Screen
                      , Thief.UI.Window
                      , Thief.UI.Editor
+                     , Thief.UI.Event
                      , Thief.UI.Theme
                      , Thief.Handler
                      , Thief.Handler.Status

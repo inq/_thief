@@ -3,7 +3,7 @@ module Thief.UI.CommandBar
   , initCommandBar
   ) where
 
-import Thief.Raw (Event(..))
+import Thief.UI.Event (Event(..))
 import Thief.UI.Common
   ( Drawable(draw)
   , Responsable(event)
